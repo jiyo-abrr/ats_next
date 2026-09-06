@@ -38,8 +38,11 @@ npm run dev
     plus `config` / `types` / `constants` / `cn` / `providers`.
   - `components/` — cross-feature only: `ui/` (shadcn), `data-table/`, `form/`, `layout/`, flat rest.
   - `features/<domain>/` — one folder per backend domain: `<domain>Service.ts`, `schema.ts`
-    (zod + response types), `hooks.ts`, and kebab-case view/column/form components.
+    (zod + response types) and `hooks.ts` at the root; presentation under `ui/{careers,ats}/`
+    (mirroring the route surfaces) with `_parts/` for a view's private sub-components.
   - `app/**/page.tsx` — routing only; each renders a `features/**` view inside `<Suspense>`.
+    Job-post routes: `/ats/job-posts/[id]` lists that post's applicants; `…/[id]/edit` is the
+    Details / Tags / Exclusions / Assessments editor.
 - **Rule** — the frontend requests & renders; the backend computes. Allowed status transitions,
   `can_withdraw`, assessment progress counts and dashboard tallies all come off the API.
 

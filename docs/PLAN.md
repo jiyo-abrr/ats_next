@@ -143,8 +143,9 @@ features/<domain>/                    # FEATURE — one per domain (shared acros
   dashboard/       → ui/ats/{dashboard-view}
   job-posts/       → ui/careers/{job-list-view, job-detail-view, job-card, apply-button}
                      ui/ats/{job-posts-view, job-posts-columns, job-post-create-view,
-                             job-post-detail-view, job-post-form, use-form-options,
-                             _parts/{details, tags, exclusions, templates}-panel}
+                             job-post-applicants-view (/[id]), job-post-edit-view (/[id]/edit),
+                             job-post-form, use-form-options,
+                             _parts/{details, tags, exclusions, templates, applicants}-panel}
   applications/    → ui/careers/{my-applications-view, my-applications-columns,
                                  application-detail-view}
                      ui/ats/{review-view, review-columns, application-review-detail-view,
@@ -423,8 +424,10 @@ route group.
 ### Phase 3 — ATS core  ✅
 - `features/dashboard/` — `<DashboardView>` StatCard rows from B3 stats.
 - `features/job-posts/` — `job-posts-view` (list, filter status/type, search), `job-post-create-view`
-  (Details form), `job-post-detail-view` with tabs: Details / Tags / Exclusions / Assessments
-  (`_components/*-panel.tsx`, dedicated add/remove endpoints), delete.
+  (Details form → redirects to `/[id]/edit`). Post routes split for clarity: `/ats/job-posts/[id]`
+  = `job-post-applicants-view` (the review list scoped to that post + Preview / Edit); `/ats/job-posts/
+  [id]/edit` = `job-post-edit-view` with tabs Details / Tags / Exclusions / Assessments
+  (`_parts/*-panel.tsx`, dedicated add/remove endpoints) + delete.
 - `features/applications/` — `review-view` (status filter), `application-review-detail-view`:
   `pipeline-stepper` + `status-actions` (buttons from `allowed_status_transitions`, B1),
   `extend-deadline-dialog`, `resume-download-button` (B5), `review-assessments` (progress + reopen
@@ -512,8 +515,8 @@ large pre-existing uncommitted refactor (HEAD is behind the `assessments/` restr
 - **`GET /applications` review list** filters by typed `?status=` / `?job_post_id=` params +
   pagination only — no querybuilder search/sort (backend limitation, flagged in the B-table).
   Both filters are surfaced in the UI: `/ats/applications` has Job-post + Status `FilterSelect`s,
-  and `/ats/job-posts/[id]` has an **Applicants** tab (`ApplicantsPanel` → `useJobApplicants`,
-  the review list pre-scoped to that post, Role column dropped).
+  and `/ats/job-posts/[id]` **is** the applicant list for that post (`ApplicantsPanel` →
+  `useJobApplicants`, the review list pre-scoped to it, Role column dropped).
 - **`dashboardSlice` is read-only** — only `loading`/`error`, no `pending`/`saving` (no mutations).
 - **No frontend test suite**; no multi-round interviews, real-time updates, email, i18n, or the
   multi-zone subdomain split.

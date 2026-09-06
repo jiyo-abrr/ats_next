@@ -1,9 +1,9 @@
 import { Suspense } from "react";
 
-import { JobPostDetailView } from "@/features/job-posts/ui/ats/job-post-detail-view";
+import { JobPostApplicantsView } from "@/features/job-posts/ui/ats/job-post-applicants-view";
 import { DetailSkeleton } from "@/components/page-skeleton";
 
-export default async function JobPostDetailPage({
+export default async function JobPostApplicantsPage({
   params,
 }: {
   params: Promise<{ id: string }>;
@@ -11,7 +11,7 @@ export default async function JobPostDetailPage({
   const { id } = await params;
   return (
     <Suspense fallback={<DetailSkeleton />}>
-      <JobPostDetailView id={id} />
+      <JobPostApplicantsView id={id} />
     </Suspense>
   );
 }

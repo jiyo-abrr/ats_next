@@ -35,7 +35,7 @@ export function JobPostCreateView() {
         createJobPost(jobPostFormBody(values)),
       ).unwrap();
       toast.success("Job post created");
-      router.push(`/ats/job-posts/${job.id}`);
+      router.push(`/ats/job-posts/${job.id}/edit`);
     } catch {
       /* toast handled by middleware */
     }
