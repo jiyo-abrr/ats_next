@@ -17,17 +17,15 @@ export function JobPostApplicantsView({ id }: { id: string }) {
 
   if (error) {
     return (
-      <div className="max-w-4xl">
-        <ErrorState
-          message="This job post could not be loaded."
-          onRetry={refetch}
-        />
-      </div>
+      <ErrorState
+        message="This job post could not be loaded."
+        onRetry={refetch}
+      />
     );
   }
   if (loading || !job) {
     return (
-      <div className="max-w-4xl space-y-4">
+      <div className="space-y-4">
         <Skeleton className="h-8 w-1/2" />
         <Skeleton className="h-64 w-full" />
       </div>
@@ -37,7 +35,7 @@ export function JobPostApplicantsView({ id }: { id: string }) {
   const meta = JOB_POST_STATUS[job.status];
 
   return (
-    <div className="max-w-4xl space-y-5">
+    <div className="space-y-5">
       <Breadcrumbs
         items={[
           { label: "Job posts", href: "/ats/job-posts" },

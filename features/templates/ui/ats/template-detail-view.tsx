@@ -48,14 +48,14 @@ export function TemplateDetailView({
 
   if (!loading && !template) {
     return (
-      <div className="max-w-3xl">
+      <div className="max-w-4xl">
         <ErrorState message="This template could not be loaded." onRetry={refetch} />
       </div>
     );
   }
   if (loading || !template) {
     return (
-      <div className="max-w-3xl space-y-4">
+      <div className="max-w-4xl space-y-4">
         <Skeleton className="h-8 w-1/2" />
         <Skeleton className="h-64 w-full" />
       </div>
@@ -78,7 +78,7 @@ export function TemplateDetailView({
     (template.questions.reduce((m, q) => Math.max(m, q.order_index), 0) || 0) + 1;
 
   return (
-    <div className="max-w-3xl space-y-6">
+    <div className="max-w-4xl space-y-6">
       <Breadcrumbs
         items={[
           { label: "Assessment templates", href: "/ats/templates" },

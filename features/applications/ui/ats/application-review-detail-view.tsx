@@ -33,14 +33,14 @@ export function ApplicationReviewDetailView({ id }: { id: string }) {
 
   if (error) {
     return (
-      <div className="max-w-3xl">
+      <div className="max-w-4xl">
         <ErrorState message="This application could not be loaded." onRetry={refetch} />
       </div>
     );
   }
   if (loading || !app) {
     return (
-      <div className="max-w-3xl space-y-4">
+      <div className="max-w-4xl space-y-4">
         <Skeleton className="h-8 w-1/2" />
         <Skeleton className="h-40 w-full" />
       </div>
@@ -55,7 +55,7 @@ export function ApplicationReviewDetailView({ id }: { id: string }) {
     app.assessment_deadline && DEADLINE_PHASE.has(app.status);
 
   return (
-    <div className="max-w-3xl space-y-6">
+    <div className="max-w-4xl space-y-6">
       <Breadcrumbs
         items={[
           { label: "Applications", href: "/ats/applications" },
