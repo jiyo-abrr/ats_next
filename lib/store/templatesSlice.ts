@@ -43,6 +43,15 @@ export const fetchTemplates = createAsyncThunk(
   },
 );
 
+/** One kind only — the per-kind templates page. */
+export const fetchTemplatesByKind = createAsyncThunk(
+  "templates/fetchTemplatesByKind",
+  async (kind: TemplateKind) => {
+    const items = await templatesService.list(kind);
+    return { kind, items };
+  },
+);
+
 export const fetchTemplate = createAsyncThunk(
   "templates/fetchTemplate",
   async ({ kind, id }: { kind: TemplateKind; id: string }) =>
@@ -122,6 +131,18 @@ const templatesSlice = createSlice({
         state.byKind["technical-assessment"] = action.payload.technical;
       })
       .addCase(fetchTemplates.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message ?? "Failed to load templates";
+      })
+      .addCase(fetchTemplatesByKind.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchTemplatesByKind.fulfilled, (state, action) => {
+        state.loading = false;
+        state.byKind[action.payload.kind] = action.payload.items;
+      })
+      .addCase(fetchTemplatesByKind.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message ?? "Failed to load templates";
       })

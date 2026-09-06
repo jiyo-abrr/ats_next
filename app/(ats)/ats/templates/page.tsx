@@ -1,15 +1,7 @@
-import { Suspense } from "react";
-import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 
-import { TemplatesView } from "@/features/templates/ui/ats/templates-view";
-import { TableSkeleton } from "@/components/data-table/table-skeleton";
-
-export const metadata: Metadata = { title: "Assessment templates" };
+import { TEMPLATE_KINDS } from "@/features/templates/schema";
 
 export default function TemplatesPage() {
-  return (
-    <Suspense fallback={<TableSkeleton />}>
-      <TemplatesView />
-    </Suspense>
-  );
+  redirect(`/ats/templates/${TEMPLATE_KINDS[0]}`);
 }

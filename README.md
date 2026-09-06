@@ -42,7 +42,9 @@ npm run dev
     (mirroring the route surfaces) with `_parts/` for a view's private sub-components.
   - `app/**/page.tsx` — routing only; each renders a `features/**` view inside `<Suspense>`.
     Job-post routes: `/ats/job-posts/[id]` lists that post's applicants; `…/[id]/edit` is the
-    Details / Tags / Exclusions / Assessments editor.
+    Details / Tags / Exclusions / Assessments editor. Assessment templates are one route per
+    kind (`/ats/templates/<pre-assessment|culture-fit|technical-assessment>`), reached from the
+    sidebar's "Assessments" accordion — only the open kind is fetched.
 - **Rule** — the frontend requests & renders; the backend computes. Allowed status transitions,
   `can_withdraw`, assessment progress counts and dashboard tallies all come off the API.
 

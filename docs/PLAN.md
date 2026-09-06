@@ -137,7 +137,7 @@ features/<domain>/                    # FEATURE — one per domain (shared acros
   assessments/     → ui/careers/{assessment-panel, attempt-runner-view, answer-input}
   positions/       → ui/ats/{positions-view, positions-columns, position-form}
   tags/            → ui/ats/{…}          company-addresses/ → ui/ats/{…}
-  templates/       → ui/ats/{templates-view, template-detail-view, template-form,
+  templates/       → ui/ats/{template-kind-view (/[kind]), template-detail-view, template-form,
                               _parts/{question-form, questions-list}}
   rbac/            → ui/ats/{rbac-view, role-permission-matrix, create-hr-account-form}
   dashboard/       → ui/ats/{dashboard-view}
@@ -439,10 +439,13 @@ route group.
   résumé streams with `Content-Disposition`.
 
 ### Phase 4 — Assessment templates + RBAC  ✅
-- `features/templates/` — `templates-view` (tabs per kind, card grid, create via sheet),
-  `template-detail-view` (edit details + questions list + `_components/question-form.tsx` with
+- `features/templates/` — `template-kind-view` (one kind per route, card grid, create via sheet;
+  `/ats/templates` → redirects to `/ats/templates/pre-assessment`; sidebar "Assessments" is an
+  accordion with the three kinds so only the open one fetches — `fetchTemplatesByKind`),
+  `template-detail-view` (edit details + questions list + `_parts/question-form.tsx` with
   dynamic config fields per `question_type` → `buildQuestionConfig`). Append-only questions
   (backend has no edit/delete/reorder). `lib/store/templatesSlice.ts` (byKind + byId).
+  `useTemplates` (all three at once) is now used only by the job-post form's template pickers.
 - `features/rbac/` (admin-only page guard) — `role-permission-matrix.tsx` (Switch grid, optimistic
   toggle via `grant`/`revoke` 204s), `create-hr-account-form.tsx` (`POST /auth/hr-accounts`).
   `lib/store/rbacSlice.ts`.

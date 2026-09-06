@@ -81,15 +81,18 @@ export function TemplateDetailView({
     <div className="space-y-6">
       <Breadcrumbs
         items={[
-          { label: "Assessment templates", href: "/ats/templates" },
-          { label: `${TEMPLATE_KIND_LABELS[kind]} · ${template.title}` },
+          {
+            label: `${TEMPLATE_KIND_LABELS[kind]} templates`,
+            href: `/ats/templates/${kind}`,
+          },
+          { label: template.title },
         ]}
       />
       <Link
-        href="/ats/templates"
+        href={`/ats/templates/${kind}`}
         className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm"
       >
-        <ArrowLeft className="size-4" /> Templates
+        <ArrowLeft className="size-4" /> {TEMPLATE_KIND_LABELS[kind]} templates
       </Link>
 
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -110,7 +113,7 @@ export function TemplateDetailView({
             try {
               await dispatch(deleteTemplate({ kind, id })).unwrap();
               toast.success("Template deleted");
-              router.push("/ats/templates");
+              router.push(`/ats/templates/${kind}`);
             } catch {
               /* handled */
             }
