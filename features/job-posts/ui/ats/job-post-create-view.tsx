@@ -42,7 +42,7 @@ export function JobPostCreateView() {
   });
 
   return (
-    <div className="max-w-4xl">
+    <div>
       <Link
         href="/ats/job-posts"
         className="text-muted-foreground hover:text-foreground mb-4 inline-flex items-center gap-1 text-sm"
