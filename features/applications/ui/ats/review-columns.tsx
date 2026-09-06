@@ -47,3 +47,8 @@ export const reviewColumns: ColumnDef<ApplicationReview, unknown>[] = [
     ),
   },
 ];
+
+/** Same table, minus the Role column — for lists already scoped to one job post. */
+export const applicantColumns = reviewColumns.filter(
+  (c) => !("accessorKey" in c && c.accessorKey === "job_title"),
+);

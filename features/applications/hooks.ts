@@ -101,6 +101,43 @@ export function useApplicationsForReview() {
   };
 }
 
+/** Applicants for one job post — the review list scoped to `job_post_id`, with a
+ * status sub-filter. Shares the review slice (re-fetched on mount elsewhere). */
+export function useJobApplicants(jobPostId: string) {
+  const dispatch = useAppDispatch();
+  const table = useTableQuery({ filterKeys: ["status"] });
+  const params = new URLSearchParams({
+    job_post_id: jobPostId,
+    page: String(table.query.page),
+    size: String(table.query.size),
+  });
+  if (table.query.filters.status)
+    params.set("status", table.query.filters.status);
+  const qs = params.toString();
+
+  const { review, reviewTotal, reviewPages, reviewLoading, reviewError } =
+    useAppSelector((s) => s.applications);
+
+  useEffect(() => {
+    dispatch(fetchApplicationsForReview(qs));
+  }, [dispatch, qs]);
+
+  const refetch = useCallback(
+    () => dispatch(fetchApplicationsForReview(qs)),
+    [dispatch, qs],
+  );
+
+  return {
+    ...table,
+    data: review,
+    total: reviewTotal,
+    pages: reviewPages,
+    loading: reviewLoading,
+    error: reviewError,
+    refetch,
+  };
+}
+
 export function useApplicationAssessments(id: string) {
   const dispatch = useAppDispatch();
   const { assessments, assessmentsLoading } = useAppSelector(

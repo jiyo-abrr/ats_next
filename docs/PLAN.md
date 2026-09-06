@@ -511,6 +511,9 @@ large pre-existing uncommitted refactor (HEAD is behind the `assessments/` restr
   (falls back to "Applicant" if opened cold).
 - **`GET /applications` review list** filters by typed `?status=` / `?job_post_id=` params +
   pagination only — no querybuilder search/sort (backend limitation, flagged in the B-table).
+  Both filters are surfaced in the UI: `/ats/applications` has Job-post + Status `FilterSelect`s,
+  and `/ats/job-posts/[id]` has an **Applicants** tab (`ApplicantsPanel` → `useJobApplicants`,
+  the review list pre-scoped to that post, Role column dropped).
 - **`dashboardSlice` is read-only** — only `loading`/`error`, no `pending`/`saving` (no mutations).
 - **No frontend test suite**; no multi-round interviews, real-time updates, email, i18n, or the
   multi-zone subdomain split.

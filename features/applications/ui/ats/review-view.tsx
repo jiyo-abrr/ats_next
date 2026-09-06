@@ -1,13 +1,16 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 import { PageHeader } from "@/components/page-header";
 import { DataTable } from "@/components/data-table/data-table";
 import { DataTablePagination } from "@/components/data-table/pagination";
 import { DataTableToolbar } from "@/components/data-table/toolbar";
 import { FilterSelect } from "@/components/data-table/filter-select";
 import { APPLICATION_STATUS } from "@/lib/constants";
+import * as jobPostsService from "@/features/job-posts/jobPostsService";
 import { useApplicationsForReview } from "@/features/applications/hooks";
-import { reviewColumns } from "./review-columns";
+import { applicantColumns, reviewColumns } from "./review-columns";
 
 const statusOptions = Object.entries(APPLICATION_STATUS).map(([value, m]) => ({
   value,
@@ -28,6 +31,21 @@ export function ReviewView() {
     refetch,
   } = useApplicationsForReview();
 
+  const [jobOptions, setJobOptions] = useState<
+    { value: string; label: string }[]
+  >([]);
+
+  useEffect(() => {
+    jobPostsService
+      .getAll("size=200&sort=created_at:desc")
+      .then((r) =>
+        setJobOptions(r.items.map((j) => ({ value: j.id, label: j.job_title }))),
+      )
+      .catch(() => undefined);
+  }, []);
+
+  const scoped = !!query.filters.job_post_id;
+
   return (
     <div>
       <PageHeader
@@ -37,17 +55,25 @@ export function ReviewView() {
 
       <DataTableToolbar
         filters={
-          <FilterSelect
-            label="Status"
-            value={query.filters.status ?? ""}
-            onChange={(v) => setFilter("status", v)}
-            options={statusOptions}
-          />
+          <>
+            <FilterSelect
+              label="Job post"
+              value={query.filters.job_post_id ?? ""}
+              onChange={(v) => setFilter("job_post_id", v)}
+              options={jobOptions}
+            />
+            <FilterSelect
+              label="Status"
+              value={query.filters.status ?? ""}
+              onChange={(v) => setFilter("status", v)}
+              options={statusOptions}
+            />
+          </>
         }
       />
 
       <DataTable
-        columns={reviewColumns}
+        columns={scoped ? applicantColumns : reviewColumns}
         data={data}
         isLoading={loading && data.length === 0}
         isError={!!error}

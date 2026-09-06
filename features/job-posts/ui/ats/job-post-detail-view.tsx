@@ -20,6 +20,7 @@ import { DetailsPanel } from "./_parts/details-panel";
 import { TagsPanel } from "./_parts/tags-panel";
 import { ExclusionsPanel } from "./_parts/exclusions-panel";
 import { TemplatesPanel } from "./_parts/templates-panel";
+import { ApplicantsPanel } from "./_parts/applicants-panel";
 
 export function JobPostDetailView({ id }: { id: string }) {
   const dispatch = useAppDispatch();
@@ -101,6 +102,7 @@ export function JobPostDetailView({ id }: { id: string }) {
       <Tabs defaultValue="details">
         <TabsList>
           <TabsTrigger value="details">Details</TabsTrigger>
+          <TabsTrigger value="applicants">Applicants</TabsTrigger>
           <TabsTrigger value="tags">Tags ({job.tags.length})</TabsTrigger>
           <TabsTrigger value="exclusions">
             Exclusions ({job.excluded_job_post_ids.length})
@@ -109,6 +111,9 @@ export function JobPostDetailView({ id }: { id: string }) {
         </TabsList>
         <TabsContent value="details" className="pt-4">
           <DetailsPanel job={job} />
+        </TabsContent>
+        <TabsContent value="applicants" className="pt-4">
+          <ApplicantsPanel jobPostId={job.id} />
         </TabsContent>
         <TabsContent value="tags" className="pt-4">
           <TagsPanel job={job} />
