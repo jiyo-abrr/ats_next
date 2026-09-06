@@ -1,9 +1,12 @@
 import { apiClient } from "@/lib/api/client";
+import type { Paginated } from "@/lib/types";
 import type { AssessmentTemplate, TemplateKind } from "@/features/templates/schema";
 
-/** `<kind>-templates` — three parallel domains, `manage_jobs`-gated, unpaginated. */
-export const list = (kind: TemplateKind) =>
-  apiClient<AssessmentTemplate[]>(`${kind}-templates`);
+/** `<kind>-templates` — three parallel domains, `manage_jobs`-gated, `?page=&size=`. */
+export const list = (kind: TemplateKind, qs = "") =>
+  apiClient<Paginated<AssessmentTemplate>>(
+    qs ? `${kind}-templates?${qs}` : `${kind}-templates`,
+  );
 
 export const get = (kind: TemplateKind, id: string) =>
   apiClient<AssessmentTemplate>(`${kind}-templates/${id}`);

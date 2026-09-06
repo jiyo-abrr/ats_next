@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageHeader } from "@/components/page-header";
+import { DataTablePagination } from "@/components/data-table/pagination";
 import { EntityFormSheet } from "@/components/form/entity-form-sheet";
 import { EmptyState, ErrorState } from "@/components/states";
 import { useAppDispatch } from "@/lib/hooks/redux";
@@ -32,7 +33,18 @@ import {
 export function TemplateKindView({ kind }: { kind: TemplateKind }) {
   const dispatch = useAppDispatch();
   const router = useRouter();
-  const { items, loading, error, saving, refetch } = useTemplatesByKind(kind);
+  const {
+    items,
+    total,
+    pages,
+    loading,
+    error,
+    saving,
+    query,
+    setPage,
+    setSize,
+    refetch,
+  } = useTemplatesByKind(kind);
   const [sheetOpen, setSheetOpen] = useState(false);
 
   const label = TEMPLATE_KIND_LABELS[kind];
@@ -88,29 +100,40 @@ export function TemplateKindView({ kind }: { kind: TemplateKind }) {
           className="py-10"
         />
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {items.map((t) => (
-            <Card key={t.id} className="hover:border-foreground/20">
-              <Link href={`/ats/templates/${kind}/${t.id}`}>
-                <CardContent className="space-y-1 p-4">
-                  <p className="font-medium">{t.title}</p>
-                  <p className="text-muted-foreground text-xs">
-                    {t.questions.length} question
-                    {t.questions.length === 1 ? "" : "s"}
-                    {t.time_limit_minutes
-                      ? ` · ${t.time_limit_minutes} min`
-                      : ""}
-                  </p>
-                  {t.description ? (
-                    <p className="text-muted-foreground line-clamp-2 text-sm">
-                      {t.description}
+        <>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {items.map((t) => (
+              <Card key={t.id} className="hover:border-foreground/20">
+                <Link href={`/ats/templates/${kind}/${t.id}`}>
+                  <CardContent className="space-y-1 p-4">
+                    <p className="font-medium">{t.title}</p>
+                    <p className="text-muted-foreground text-xs">
+                      {t.questions.length} question
+                      {t.questions.length === 1 ? "" : "s"}
+                      {t.time_limit_minutes
+                        ? ` · ${t.time_limit_minutes} min`
+                        : ""}
                     </p>
-                  ) : null}
-                </CardContent>
-              </Link>
-            </Card>
-          ))}
-        </div>
+                    {t.description ? (
+                      <p className="text-muted-foreground line-clamp-2 text-sm">
+                        {t.description}
+                      </p>
+                    ) : null}
+                  </CardContent>
+                </Link>
+              </Card>
+            ))}
+          </div>
+          <DataTablePagination
+            page={query.page}
+            size={query.size}
+            total={total}
+            pages={pages}
+            onPageChange={setPage}
+            onSizeChange={setSize}
+            isLoading={loading}
+          />
+        </>
       )}
 
       <EntityFormSheet

@@ -8,8 +8,14 @@ import type {
 
 // 1. State type
 interface TemplatesState {
+  /** All three kinds, unpaginated — only the job-post form's pickers read this. */
   byKind: Record<TemplateKind, AssessmentTemplate[]>;
   byId: Record<string, AssessmentTemplate>;
+  /** The current paginated per-kind page (`/ats/templates/<kind>`). */
+  list: AssessmentTemplate[];
+  listKind: TemplateKind | null;
+  listTotal: number;
+  listPages: number;
   loading: boolean;
   detailLoading: boolean;
   saving: boolean;
@@ -24,6 +30,10 @@ const initialState: TemplatesState = {
     "technical-assessment": [],
   },
   byId: {},
+  list: [],
+  listKind: null,
+  listTotal: 0,
+  listPages: 0,
   loading: false,
   detailLoading: false,
   saving: false,
@@ -31,24 +41,29 @@ const initialState: TemplatesState = {
 };
 
 // 3. Async thunks
+/** All three kinds for the job-post form pickers — a generous first page each. */
 export const fetchTemplates = createAsyncThunk(
   "templates/fetchTemplates",
   async () => {
     const [pre, culture, technical] = await Promise.all([
-      templatesService.list("pre-assessment"),
-      templatesService.list("culture-fit"),
-      templatesService.list("technical-assessment"),
+      templatesService.list("pre-assessment", "size=100"),
+      templatesService.list("culture-fit", "size=100"),
+      templatesService.list("technical-assessment", "size=100"),
     ]);
-    return { pre, culture, technical };
+    return {
+      pre: pre.items,
+      culture: culture.items,
+      technical: technical.items,
+    };
   },
 );
 
-/** One kind only — the per-kind templates page. */
+/** One kind, one page — the per-kind templates page. */
 export const fetchTemplatesByKind = createAsyncThunk(
   "templates/fetchTemplatesByKind",
-  async (kind: TemplateKind) => {
-    const items = await templatesService.list(kind);
-    return { kind, items };
+  async ({ kind, qs }: { kind: TemplateKind; qs: string }) => {
+    const page = await templatesService.list(kind, qs);
+    return { kind, page };
   },
 );
 
@@ -140,7 +155,10 @@ const templatesSlice = createSlice({
       })
       .addCase(fetchTemplatesByKind.fulfilled, (state, action) => {
         state.loading = false;
-        state.byKind[action.payload.kind] = action.payload.items;
+        state.listKind = action.payload.kind;
+        state.list = action.payload.page.items;
+        state.listTotal = action.payload.page.total;
+        state.listPages = action.payload.page.pages;
       })
       .addCase(fetchTemplatesByKind.rejected, (state, action) => {
         state.loading = false;

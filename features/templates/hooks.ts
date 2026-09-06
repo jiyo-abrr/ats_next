@@ -3,6 +3,7 @@
 import { useCallback, useEffect } from "react";
 
 import { useAppDispatch, useAppSelector } from "@/lib/hooks/redux";
+import { useTableQuery } from "@/lib/hooks/use-table-query";
 import {
   fetchTemplate,
   fetchTemplates,
@@ -26,23 +27,38 @@ export function useTemplates() {
   return { ...state, refetch };
 }
 
-/** One kind — the per-kind templates page (`/ats/templates/<kind>`). */
+/** One kind, paginated — the per-kind templates page (`/ats/templates/<kind>`). */
 export function useTemplatesByKind(kind: TemplateKind) {
   const dispatch = useAppDispatch();
-  const items = useAppSelector((s) => s.templates.byKind[kind]);
-  const loading = useAppSelector((s) => s.templates.loading);
-  const error = useAppSelector((s) => s.templates.error);
-  const saving = useAppSelector((s) => s.templates.saving);
+  const table = useTableQuery();
+  const qs = new URLSearchParams({
+    page: String(table.query.page),
+    size: String(table.query.size),
+  }).toString();
+
+  const { list, listKind, listTotal, listPages, loading, error, saving } =
+    useAppSelector((s) => s.templates);
 
   useEffect(() => {
-    dispatch(fetchTemplatesByKind(kind));
-  }, [dispatch, kind]);
+    dispatch(fetchTemplatesByKind({ kind, qs }));
+  }, [dispatch, kind, qs]);
 
   const refetch = useCallback(() => {
-    dispatch(fetchTemplatesByKind(kind));
-  }, [dispatch, kind]);
+    dispatch(fetchTemplatesByKind({ kind, qs }));
+  }, [dispatch, kind, qs]);
 
-  return { items, loading: loading && items.length === 0, error, saving, refetch };
+  const items = listKind === kind ? list : [];
+
+  return {
+    ...table,
+    items,
+    total: listTotal,
+    pages: listPages,
+    loading: loading && items.length === 0,
+    error,
+    saving,
+    refetch,
+  };
 }
 
 export function useTemplate(kind: TemplateKind, id: string) {
