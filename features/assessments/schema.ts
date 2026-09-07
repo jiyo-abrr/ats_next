@@ -33,7 +33,6 @@ export interface CurrentQuestion {
   id: string;
   order_index: number;
   prompt: string;
-  instructions: string | null;
   question_type: QuestionType;
   config: Record<string, unknown> | null;
   time_limit_seconds: number | null;

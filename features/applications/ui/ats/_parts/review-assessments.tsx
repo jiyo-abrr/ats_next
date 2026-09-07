@@ -131,7 +131,7 @@ export function ReviewAssessments({ applicationId }: { applicationId: string }) 
                   return (
                     <TableRow key={a.id}>
                       <TableCell className="font-medium">
-                        {TEMPLATE_TYPE_LABELS[a.template_type]} assessment
+                        {TEMPLATE_TYPE_LABELS[a.template_type]}
                       </TableCell>
                       <TableCell>
                         <StatusBadge label={meta.label} tone={meta.tone} />

@@ -147,7 +147,7 @@ export function AttemptRunnerView({ attemptId }: { attemptId: string }) {
       <div className="space-y-2">
         <div className="flex items-center justify-between text-sm">
           <span className="font-medium">
-            {TEMPLATE_TYPE_LABELS[attempt.template_type]} assessment
+            {TEMPLATE_TYPE_LABELS[attempt.template_type]}
           </span>
           {attemptEnd ? (
             <span className="text-muted-foreground flex items-center gap-1">
@@ -167,11 +167,6 @@ export function AttemptRunnerView({ attemptId }: { attemptId: string }) {
           <CardTitle className="text-base leading-snug">
             {currentQuestion.prompt}
           </CardTitle>
-          {currentQuestion.instructions ? (
-            <p className="text-muted-foreground text-sm">
-              {currentQuestion.instructions}
-            </p>
-          ) : null}
         </CardHeader>
         <CardContent className="space-y-4">
           <AnswerInput

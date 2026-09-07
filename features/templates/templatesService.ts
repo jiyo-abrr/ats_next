@@ -40,3 +40,37 @@ export const addQuestion = (
     method: "POST",
     body: JSON.stringify(body),
   });
+
+/** Edit an existing question in place — returns the refreshed template. */
+export const updateQuestion = (
+  kind: TemplateKind,
+  id: string,
+  questionId: string,
+  body: Record<string, unknown>,
+) =>
+  apiClient<AssessmentTemplate>(
+    `${kind}-templates/${id}/questions/${questionId}`,
+    { method: "PUT", body: JSON.stringify(body) },
+  );
+
+/** Delete a question — returns the refreshed template. */
+export const deleteQuestion = (
+  kind: TemplateKind,
+  id: string,
+  questionId: string,
+) =>
+  apiClient<AssessmentTemplate>(
+    `${kind}-templates/${id}/questions/${questionId}`,
+    { method: "DELETE" },
+  );
+
+/** Rewrite question order — `questionIds` must be the template's full set. */
+export const reorderQuestions = (
+  kind: TemplateKind,
+  id: string,
+  questionIds: string[],
+) =>
+  apiClient<AssessmentTemplate>(
+    `${kind}-templates/${id}/questions/reorder`,
+    { method: "PUT", body: JSON.stringify({ question_ids: questionIds }) },
+  );

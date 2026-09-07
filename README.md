@@ -55,7 +55,26 @@ on `ApplicationOut`, `answered_count`/`total_questions` on `AssessmentAttemptOut
 `GET /applications/stats` + `GET /job-posts/stats`, `GET /applications/me?job_post_id=`,
 `GET /applications/{id}/resume`. See `../ats_fastapi/CLAUDE.md`.
 
+## Assessment template authoring
+
+Split into three routes per kind (`pre-assessment` / `culture-fit` / `technical-assessment`):
+
+| Route | View |
+|---|---|
+| `/ats/templates/<kind>` | list of templates |
+| `/ats/templates/<kind>/new` | create form (redirects to `…/edit` on success) |
+| `/ats/templates/<kind>/<id>` | **read-only bento view** — overview, timers, instructions, question-type mix, question list |
+| `/ats/templates/<kind>/<id>/edit` | edit template details + **add / edit in place / delete / reorder (up-down)** questions |
+
+Question config is per-type — choice `options` + `min/max_selections`, `number`/`rating` bounds,
+`text` `max_length`, `date` bounds. Backed by `PUT`/`DELETE /{kind}-templates/{id}/questions/{qid}`
+and `PUT /{kind}-templates/{id}/questions/reorder` (all return the refreshed template). No guard
+against editing a question after applicants have attempts against the template — HR's call.
+
+Instructions live **only at the template level** (shown to the applicant once before the attempt
+starts) — there is no per-question instructions field.
+
 ## Known limitations
 
-Assessment questions are **append-only** (no backend edit/delete/reorder). No résumé preview
-(download only). Applicant directory is limited to what the review-list projection carries.
+No résumé preview (download only). Applicant directory is limited to what the review-list
+projection carries.

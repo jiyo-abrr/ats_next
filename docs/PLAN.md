@@ -137,7 +137,9 @@ features/<domain>/                    # FEATURE — one per domain (shared acros
   assessments/     → ui/careers/{assessment-panel, attempt-runner-view, answer-input}
   positions/       → ui/ats/{positions-view, positions-columns, position-form}
   tags/            → ui/ats/{…}          company-addresses/ → ui/ats/{…}
-  templates/       → ui/ats/{template-kind-view (/[kind]), template-detail-view, template-form,
+  templates/       → ui/ats/{template-kind-view (/[kind]), template-create-view (/[kind]/new),
+                              template-view (/[kind]/[id], bento read-only),
+                              template-edit-view (/[kind]/[id]/edit), template-form,
                               _parts/{question-form, questions-list}}
   rbac/            → ui/ats/{rbac-view, role-permission-matrix, create-hr-account-form}
   dashboard/       → ui/ats/{dashboard-view}
@@ -445,7 +447,8 @@ route group.
   only the open one fetches — `fetchTemplatesByKind({kind, qs})` → `list` / `listTotal` /
   `listPages` / `listKind` slice state), `template-detail-view` (edit details + questions list +
   `_parts/question-form.tsx` with dynamic config per `question_type` → `buildQuestionConfig`).
-  Append-only questions (backend has no edit/delete/reorder). `lib/store/templatesSlice.ts`
+  Questions are now fully editable — add / edit-in-place / delete / reorder + richer per-type
+  config (see the "Assessment template authoring" section of the README). `lib/store/templatesSlice.ts`
   (byKind + byId + the paginated `list`). `useTemplates` (all three, `size=100` each) is now used
   only by the job-post form's template pickers.
   **Backend:** the 3 `GET /<kind>-templates` endpoints are now `Page[...]` (`QueryBuilder` +
@@ -513,8 +516,9 @@ large pre-existing uncommitted refactor (HEAD is behind the `assessments/` restr
 **not** part of this work.
 
 ### Deferred / known limitations (not blockers — documented in `ats_next/README.md`)
-- **Assessment questions are append-only** — the backend has no question edit / delete / reorder
-  endpoint, so `question-form` only adds. Order index auto-increments from the current max.
+- ~~**Assessment questions are append-only**~~ — **done.** `PUT`/`DELETE
+  /{kind}-templates/{id}/questions/{qid}` + `PUT .../questions/reorder` on all 3 template domains;
+  `question-form` does add + edit, `questions-list` does reorder (up/down) + delete.
 - **Résumé is download-only** (B5 streams the file) — no in-browser preview.
 - **No standalone applicant directory** — the ATS shows applicant name/email from the
   `ApplicationReviewOut` projection; the review detail page reads it from the cached review list

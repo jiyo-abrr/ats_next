@@ -4,22 +4,23 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { FieldGroup } from "@/components/ui/field";
-import {
-  SelectField,
-  TextareaField,
-  TextField,
-} from "@/components/form/fields";
+import { SelectField, TextareaField, TextField } from "@/components/form/fields";
 import { QUESTION_TYPE_LABELS } from "@/lib/constants";
 import { useAppDispatch } from "@/lib/hooks/redux";
 import { toast } from "@/lib/utils/toast";
-import { addTemplateQuestion } from "@/lib/store/templatesSlice";
+import {
+  addTemplateQuestion,
+  updateTemplateQuestion,
+} from "@/lib/store/templatesSlice";
 import {
   QUESTION_TYPES,
   type QuestionInput,
   type TemplateKind,
+  type TemplateQuestion,
   buildQuestionConfig,
+  questionFormBody,
+  questionFormValues,
   questionSchema,
 } from "@/features/templates/schema";
 
@@ -28,134 +29,195 @@ const typeOptions = QUESTION_TYPES.map((value) => ({
   label: QUESTION_TYPE_LABELS[value],
 }));
 
+/** Bare form (no card wrapper) — callers place it in a card / bordered row. */
 export function QuestionForm({
   kind,
   templateId,
+  question,
   nextOrderIndex,
-  onAdded,
+  onDone,
+  onCancel,
 }: {
   kind: TemplateKind;
   templateId: string;
-  nextOrderIndex: number;
-  onAdded: () => void;
+  /** Present ⇒ edit mode. Absent ⇒ append a new question. */
+  question?: TemplateQuestion;
+  /** Only used when appending. */
+  nextOrderIndex?: number;
+  onDone: () => void;
+  /** Shown as a Cancel button when editing. */
+  onCancel?: () => void;
 }) {
   const dispatch = useAppDispatch();
+  const editing = !!question;
 
   const form = useForm<QuestionInput>({
     resolver: zodResolver(questionSchema),
-    defaultValues: {
-      prompt: "",
-      instructions: "",
-      question_type: "text",
-      options: "",
-      min: "",
-      max: "",
-      time_limit_seconds: "",
-    },
+    defaultValues: questionFormValues(question),
   });
   // eslint-disable-next-line react-hooks/incompatible-library
   const qType = form.watch("question_type");
 
   const onSubmit = form.handleSubmit(async (v) => {
-    if (
-      (v.question_type === "single_choice" ||
-        v.question_type === "multiple_choice") &&
-      buildQuestionConfig(v)?.options === undefined
-    ) {
+    const isChoiceType =
+      v.question_type === "single_choice" ||
+      v.question_type === "multiple_choice";
+    if (isChoiceType && buildQuestionConfig(v)?.options === undefined) {
       form.setError("options", { message: "Add at least one option" });
       return;
     }
     try {
-      await dispatch(
-        addTemplateQuestion({
-          kind,
-          id: templateId,
-          body: {
-            order_index: nextOrderIndex,
-            prompt: v.prompt,
-            instructions: v.instructions || null,
-            question_type: v.question_type,
-            config: buildQuestionConfig(v),
-            time_limit_seconds: v.time_limit_seconds
-              ? Number(v.time_limit_seconds)
-              : null,
-          },
-        }),
-      ).unwrap();
-      toast.success("Question added");
-      form.reset();
-      onAdded();
+      if (editing) {
+        await dispatch(
+          updateTemplateQuestion({
+            kind,
+            id: templateId,
+            questionId: question.id,
+            body: questionFormBody(v),
+          }),
+        ).unwrap();
+        toast.success("Question updated");
+      } else {
+        await dispatch(
+          addTemplateQuestion({
+            kind,
+            id: templateId,
+            body: questionFormBody(v, nextOrderIndex ?? 0),
+          }),
+        ).unwrap();
+        toast.success("Question added");
+        form.reset(questionFormValues());
+      }
+      onDone();
     } catch {
-      /* handled */
+      /* toast-error middleware surfaces it */
     }
   });
 
-  const isChoice =
-    qType === "single_choice" || qType === "multiple_choice";
+  const isChoice = qType === "single_choice" || qType === "multiple_choice";
+  const isMulti = qType === "multiple_choice";
   const isRange = qType === "number" || qType === "rating";
+  const isText = qType === "text" || qType === "long_text";
+  const isDate = qType === "date";
 
   return (
-    <Card>
-      <CardContent className="p-4">
-        <form onSubmit={onSubmit} className="space-y-4">
-          <FieldGroup>
-            <SelectField
+    <form onSubmit={onSubmit} className="space-y-4">
+      <FieldGroup>
+        <SelectField
+          control={form.control}
+          name="question_type"
+          label="Type"
+          options={typeOptions}
+          required
+        />
+        <TextareaField
+          control={form.control}
+          name="prompt"
+          label="Prompt"
+          rows={2}
+          required
+        />
+
+        {isChoice ? (
+          <TextareaField
+            control={form.control}
+            name="options"
+            label="Options (one per line)"
+            rows={4}
+          />
+        ) : null}
+
+        {isMulti ? (
+          <div className="grid gap-4 sm:grid-cols-2">
+            <TextField
               control={form.control}
-              name="question_type"
-              label="Type"
-              options={typeOptions}
-              required
-            />
-            <TextareaField
-              control={form.control}
-              name="prompt"
-              label="Prompt"
-              rows={2}
-              required
+              name="min_selections"
+              label="Min selections"
+              type="number"
+              description="Blank = no minimum"
             />
             <TextField
               control={form.control}
-              name="instructions"
-              label="Instructions"
+              name="max_selections"
+              label="Max selections"
+              type="number"
+              description="Blank = no maximum"
             />
-            {isChoice ? (
-              <TextareaField
-                control={form.control}
-                name="options"
-                label="Options (one per line)"
-                rows={4}
-              />
-            ) : null}
-            {isRange ? (
-              <div className="grid gap-4 sm:grid-cols-2">
-                <TextField
-                  control={form.control}
-                  name="min"
-                  label="Min"
-                  type="number"
-                />
-                <TextField
-                  control={form.control}
-                  name="max"
-                  label="Max"
-                  type="number"
-                />
-              </div>
-            ) : null}
+          </div>
+        ) : null}
+
+        {isRange ? (
+          <div className="grid gap-4 sm:grid-cols-2">
             <TextField
               control={form.control}
-              name="time_limit_seconds"
-              label="Per-question time limit (seconds)"
+              name="min"
+              label="Min"
               type="number"
             />
-          </FieldGroup>
-          <div className="flex justify-end">
-            <Button type="submit" disabled={form.formState.isSubmitting}>
-              {form.formState.isSubmitting ? "Adding…" : "Add question"}
-            </Button>
+            <TextField
+              control={form.control}
+              name="max"
+              label="Max"
+              type="number"
+            />
           </div>
-        </form>
-      </CardContent>
-    </Card>
+        ) : null}
+
+        {isText ? (
+          <TextField
+            control={form.control}
+            name="max_length"
+            label="Max length (characters)"
+            type="number"
+            description="Blank = no limit"
+          />
+        ) : null}
+
+        {isDate ? (
+          <div className="grid gap-4 sm:grid-cols-2">
+            <TextField
+              control={form.control}
+              name="min_date"
+              label="Earliest allowed"
+              type="date"
+            />
+            <TextField
+              control={form.control}
+              name="max_date"
+              label="Latest allowed"
+              type="date"
+            />
+          </div>
+        ) : null}
+
+        <TextField
+          control={form.control}
+          name="time_limit_seconds"
+          label="Per-question time limit (seconds)"
+          type="number"
+          description="Blank = untimed. A question past its timer is skipped."
+        />
+      </FieldGroup>
+
+      <div className="flex justify-end gap-2">
+        {editing && onCancel ? (
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={onCancel}
+            disabled={form.formState.isSubmitting}
+          >
+            Cancel
+          </Button>
+        ) : null}
+        <Button type="submit" disabled={form.formState.isSubmitting}>
+          {form.formState.isSubmitting
+            ? "Saving…"
+            : editing
+              ? "Save question"
+              : "Add question"}
+        </Button>
+      </div>
+    </form>
   );
 }

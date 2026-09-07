@@ -118,6 +118,47 @@ export const addTemplateQuestion = createAsyncThunk(
   }) => templatesService.addQuestion(kind, id, body),
 );
 
+export const updateTemplateQuestion = createAsyncThunk(
+  "templates/updateQuestion",
+  async ({
+    kind,
+    id,
+    questionId,
+    body,
+  }: {
+    kind: TemplateKind;
+    id: string;
+    questionId: string;
+    body: Record<string, unknown>;
+  }) => templatesService.updateQuestion(kind, id, questionId, body),
+);
+
+export const deleteTemplateQuestion = createAsyncThunk(
+  "templates/deleteQuestion",
+  async ({
+    kind,
+    id,
+    questionId,
+  }: {
+    kind: TemplateKind;
+    id: string;
+    questionId: string;
+  }) => templatesService.deleteQuestion(kind, id, questionId),
+);
+
+export const reorderTemplateQuestions = createAsyncThunk(
+  "templates/reorderQuestions",
+  async ({
+    kind,
+    id,
+    questionIds,
+  }: {
+    kind: TemplateKind;
+    id: string;
+    questionIds: string[];
+  }) => templatesService.reorderQuestions(kind, id, questionIds),
+);
+
 // 4. Slice
 const templatesSlice = createSlice({
   name: "templates",
@@ -132,6 +173,9 @@ const templatesSlice = createSlice({
       createTemplate,
       updateTemplate,
       addTemplateQuestion,
+      updateTemplateQuestion,
+      deleteTemplateQuestion,
+      reorderTemplateQuestions,
     ] as const;
 
     builder

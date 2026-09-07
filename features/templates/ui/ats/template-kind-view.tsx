@@ -1,10 +1,6 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -12,62 +8,18 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageHeader } from "@/components/page-header";
 import { DataTablePagination } from "@/components/data-table/pagination";
-import { EntityFormSheet } from "@/components/form/entity-form-sheet";
 import { EmptyState, ErrorState } from "@/components/states";
-import { useAppDispatch } from "@/lib/hooks/redux";
-import { toast } from "@/lib/utils/toast";
-import { createTemplate } from "@/lib/store/templatesSlice";
 import { useTemplatesByKind } from "@/features/templates/hooks";
 import {
   TEMPLATE_KIND_LABELS,
-  type TemplateInput,
   type TemplateKind,
-  templateSchema,
 } from "@/features/templates/schema";
-import {
-  TemplateForm,
-  templateFormBody,
-  templateFormValues,
-} from "./template-form";
 
 export function TemplateKindView({ kind }: { kind: TemplateKind }) {
-  const dispatch = useAppDispatch();
-  const router = useRouter();
-  const {
-    items,
-    total,
-    pages,
-    loading,
-    error,
-    saving,
-    query,
-    setPage,
-    setSize,
-    refetch,
-  } = useTemplatesByKind(kind);
-  const [sheetOpen, setSheetOpen] = useState(false);
+  const { items, total, pages, loading, error, query, setPage, setSize, refetch } =
+    useTemplatesByKind(kind);
 
   const label = TEMPLATE_KIND_LABELS[kind];
-
-  const form = useForm<TemplateInput>({
-    resolver: zodResolver(templateSchema),
-    defaultValues: templateFormValues(),
-  });
-
-  const onSubmit = form.handleSubmit(async (values) => {
-    try {
-      const tpl = await dispatch(
-        createTemplate({ kind, body: templateFormBody(values) }),
-      ).unwrap();
-      toast.success("Template created");
-      setSheetOpen(false);
-      form.reset(templateFormValues());
-      refetch();
-      router.push(`/ats/templates/${kind}/${tpl.id}`);
-    } catch {
-      /* handled */
-    }
-  });
 
   return (
     <div className="space-y-4">
@@ -75,14 +27,10 @@ export function TemplateKindView({ kind }: { kind: TemplateKind }) {
         title={`${label} templates`}
         description="Author the tests applicants complete before prescreening."
         actions={
-          <Button
-            size="sm"
-            onClick={() => {
-              form.reset(templateFormValues());
-              setSheetOpen(true);
-            }}
-          >
-            <Plus /> New {label.toLowerCase()} template
+          <Button asChild size="sm">
+            <Link href={`/ats/templates/${kind}/new`}>
+              <Plus /> New {label.toLowerCase()} template
+            </Link>
           </Button>
         }
       />
@@ -98,6 +46,13 @@ export function TemplateKindView({ kind }: { kind: TemplateKind }) {
         <EmptyState
           title={`No ${label.toLowerCase()} templates yet`}
           className="py-10"
+          action={
+            <Button asChild size="sm">
+              <Link href={`/ats/templates/${kind}/new`}>
+                <Plus /> New template
+              </Link>
+            </Button>
+          }
         />
       ) : (
         <>
@@ -135,17 +90,6 @@ export function TemplateKindView({ kind }: { kind: TemplateKind }) {
           />
         </>
       )}
-
-      <EntityFormSheet
-        open={sheetOpen}
-        onOpenChange={setSheetOpen}
-        title={`New ${label.toLowerCase()} template`}
-        onSubmit={onSubmit}
-        isSubmitting={saving}
-        submitLabel="Create"
-      >
-        <TemplateForm form={form} />
-      </EntityFormSheet>
     </div>
   );
 }

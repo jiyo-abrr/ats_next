@@ -27,7 +27,7 @@ function AttemptRow({
     <div className="flex flex-wrap items-center justify-between gap-3 border-b py-3 last:border-0">
       <div className="space-y-1">
         <p className="text-sm font-medium">
-          {TEMPLATE_TYPE_LABELS[attempt.template_type]} assessment
+          {TEMPLATE_TYPE_LABELS[attempt.template_type]}
         </p>
         <div className="text-muted-foreground flex items-center gap-2 text-xs">
           <StatusBadge label={meta.label} tone={meta.tone} />
