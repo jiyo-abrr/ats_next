@@ -4,8 +4,15 @@ import { useState } from "react";
 import { History } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   Dialog,
   DialogClose,
@@ -98,67 +105,80 @@ export function ReviewAssessments({ applicationId }: { applicationId: string }) 
   const { attempts, deadline_extensions } = assessments;
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Assessments</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {attempts.length === 0 ? (
-          <p className="text-muted-foreground text-sm">
-            No assessments attached to this role.
-          </p>
-        ) : (
-          <div>
-            {attempts.map((a) => {
-              const meta = ATTEMPT_STATUS[a.status];
-              return (
-                <div
-                  key={a.id}
-                  className="flex flex-wrap items-center justify-between gap-3 border-b py-3 last:border-0"
-                >
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium">
-                      {TEMPLATE_TYPE_LABELS[a.template_type]} assessment
-                    </p>
-                    <div className="text-muted-foreground flex items-center gap-2 text-xs">
-                      <StatusBadge label={meta.label} tone={meta.tone} />
-                      <span>
-                        {a.answered_count} / {a.total_questions} answered
-                      </span>
-                      {a.reopens.length > 0 ? (
-                        <span className="flex items-center gap-1">
-                          <History className="size-3" /> {a.reopens.length}×
-                        </span>
-                      ) : null}
-                    </div>
-                  </div>
-                  {a.status === "expired" ? (
-                    <ReopenDialog
-                      attemptId={a.id}
-                      applicationId={applicationId}
-                      onDone={refetch}
-                    />
-                  ) : null}
-                </div>
-              );
-            })}
-          </div>
-        )}
+    <section className="space-y-3">
+      <h2 className="text-lg font-medium">Assessments</h2>
 
-        {deadline_extensions.length > 0 ? (
-          <div className="space-y-2 border-t pt-3">
-            <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-              Deadline extensions
-            </p>
-            {deadline_extensions.map((e) => (
-              <div key={e.id} className="text-muted-foreground text-xs">
-                → {formatDateTime(e.new_deadline)} · {e.reason} ·{" "}
-                {formatDateTime(e.extended_at)}
-              </div>
-            ))}
+      {attempts.length === 0 ? (
+        <p className="text-muted-foreground text-sm">
+          No assessments attached to this role.
+        </p>
+      ) : (
+        <div className="overflow-hidden rounded-lg border">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Assessment</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Progress</TableHead>
+                  <TableHead>Reopens</TableHead>
+                  <TableHead className="text-right">Action</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {attempts.map((a) => {
+                  const meta = ATTEMPT_STATUS[a.status];
+                  return (
+                    <TableRow key={a.id}>
+                      <TableCell className="font-medium">
+                        {TEMPLATE_TYPE_LABELS[a.template_type]} assessment
+                      </TableCell>
+                      <TableCell>
+                        <StatusBadge label={meta.label} tone={meta.tone} />
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {a.answered_count} / {a.total_questions} answered
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {a.reopens.length > 0 ? (
+                          <span className="flex items-center gap-1">
+                            <History className="size-3" /> {a.reopens.length}×
+                          </span>
+                        ) : (
+                          "—"
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {a.status === "expired" ? (
+                          <ReopenDialog
+                            attemptId={a.id}
+                            applicationId={applicationId}
+                            onDone={refetch}
+                          />
+                        ) : null}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
           </div>
-        ) : null}
-      </CardContent>
-    </Card>
+        </div>
+      )}
+
+      {deadline_extensions.length > 0 ? (
+        <div className="space-y-2 pt-1">
+          <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+            Deadline extensions
+          </p>
+          {deadline_extensions.map((e) => (
+            <div key={e.id} className="text-muted-foreground text-xs">
+              → {formatDateTime(e.new_deadline)} · {e.reason} ·{" "}
+              {formatDateTime(e.extended_at)}
+            </div>
+          ))}
+        </div>
+      ) : null}
+    </section>
   );
 }
