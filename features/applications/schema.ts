@@ -91,6 +91,35 @@ export interface AttemptReview {
   questions: AttemptReviewQuestion[];
 }
 
+export interface AttemptSummary {
+  template_type: TemplateType;
+  status: AttemptStatus;
+  answered_count: number;
+  total_questions: number;
+  started_at: string | null;
+  completed_at: string | null;
+}
+
+/** GET /applications/assessment-scorecard — one applicant per row with a
+ * compact per-assessment roll-up (Compare tab). */
+export interface ApplicationScorecard {
+  id: string;
+  created_at: string;
+  status: ApplicationStatus;
+  applicant_first_name: string;
+  applicant_last_name: string;
+  applicant_email: string;
+  assessments: AttemptSummary[];
+}
+
+export interface JobAssessmentReviewRow {
+  application_id: string;
+  applicant_first_name: string;
+  applicant_last_name: string;
+  applicant_email: string;
+  attempt: AttemptReview | null;
+}
+
 export interface StatusStats {
   by_status: Record<string, number>;
   total: number;

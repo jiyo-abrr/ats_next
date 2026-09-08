@@ -4,7 +4,9 @@ import type {
   ApplicantRollup,
   Application,
   ApplicationAssessments,
+  ApplicationScorecard,
   AttemptReview,
+  JobAssessmentReviewRow,
   ApplicationReview,
   ApplicationSummary,
   StatusStats,
@@ -45,6 +47,16 @@ export const listForReview = (qs: string) =>
 export const listApplicants = (qs: string) =>
   apiClient<Paginated<ApplicantRollup>>(
     qs ? `applications/applicants?${qs}` : "applications/applicants",
+  );
+
+export const getAssessmentScorecard = (qs: string) =>
+  apiClient<Paginated<ApplicationScorecard>>(
+    `applications/assessment-scorecard?${qs}`,
+  );
+
+export const getJobAssessmentReview = (qs: string) =>
+  apiClient<Paginated<JobAssessmentReviewRow>>(
+    `applications/assessment-review?${qs}`,
   );
 
 export const updateStatus = (id: string, status: string) =>
