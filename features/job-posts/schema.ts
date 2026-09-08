@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import type { EmploymentType, JobPostStatus } from "@/lib/types";
+import type { CurrencyCode, EmploymentType, JobPostStatus } from "@/lib/types";
 import type { Tag } from "@/features/tags/schema";
 
 export interface JobPost {
@@ -11,6 +11,7 @@ export interface JobPost {
   qualifications: string;
   salary_min: string | null;
   salary_max: string | null;
+  currency: CurrencyCode;
   employment_type: EmploymentType;
   status: JobPostStatus;
   company_address_id: string;
@@ -51,6 +52,20 @@ export const jobPostSchema = z
     qualifications: z.string().trim().min(1, "Required").max(10000),
     salary_min: money,
     salary_max: money,
+    currency: z.enum([
+      "PHP",
+      "USD",
+      "EUR",
+      "GBP",
+      "SGD",
+      "AUD",
+      "CAD",
+      "JPY",
+      "HKD",
+      "MYR",
+      "INR",
+      "CNY",
+    ]),
     employment_type: z.enum([
       "full_time",
       "part_time",

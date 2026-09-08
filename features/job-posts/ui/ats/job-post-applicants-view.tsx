@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Pencil } from "lucide-react";
+import { ArrowLeft, GitCompare, Pencil } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -74,7 +74,14 @@ export function JobPostApplicantsView({ id }: { id: string }) {
       </div>
 
       <div>
-        <h2 className="mb-3 text-lg font-medium">Applicants</h2>
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-lg font-medium">Applicants</h2>
+          <Button asChild variant="outline" size="sm">
+            <Link href={`/ats/job-posts/${job.id}/compare`}>
+              <GitCompare /> Compare
+            </Link>
+          </Button>
+        </div>
         <ApplicantsPanel jobPostId={job.id} />
       </div>
     </div>

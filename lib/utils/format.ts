@@ -47,15 +47,24 @@ export function formatRelative(value: string | null | undefined): string {
 
 export function formatMoney(
   value: string | number | null | undefined,
+  currency = "PHP",
 ): string | null {
   if (value === null || value === undefined || value === "") return null;
   const n = typeof value === "string" ? Number(value) : value;
   if (Number.isNaN(n)) return null;
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-  }).format(n);
+  try {
+    return new Intl.NumberFormat("en-PH", {
+      style: "currency",
+      currency,
+      currencyDisplay: "narrowSymbol",
+      maximumFractionDigits: 0,
+    }).format(n);
+  } catch {
+    // Unknown/invalid ISO code — fall back to a plain grouped number + code.
+    return `${currency} ${new Intl.NumberFormat("en-PH", {
+      maximumFractionDigits: 0,
+    }).format(n)}`;
+  }
 }
 
 export function fullName(p: {
@@ -72,9 +81,11 @@ export function fullName(p: {
 export function salaryLabel(range: {
   salary_min: string | number | null;
   salary_max: string | number | null;
+  currency?: string | null;
 }): string | null {
-  const min = formatMoney(range.salary_min);
-  const max = formatMoney(range.salary_max);
+  const currency = range.currency ?? "PHP";
+  const min = formatMoney(range.salary_min, currency);
+  const max = formatMoney(range.salary_max, currency);
   if (min && max) return `${min} – ${max}`;
   return min ?? max ?? null;
 }

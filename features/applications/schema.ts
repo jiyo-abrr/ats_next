@@ -1,6 +1,11 @@
 import { z } from "zod";
 
-import type { ApplicationStatus } from "@/lib/types";
+import type {
+  ApplicationStatus,
+  AttemptStatus,
+  QuestionType,
+  TemplateType,
+} from "@/lib/types";
 import type { AssessmentAttempt } from "@/features/assessments/schema";
 
 export interface ApplicationSummary {
@@ -60,6 +65,30 @@ export interface DeadlineExtension {
 export interface ApplicationAssessments {
   attempts: AssessmentAttempt[];
   deadline_extensions: DeadlineExtension[];
+}
+
+export interface AttemptReviewQuestion {
+  question_id: string;
+  order_index: number;
+  prompt: string;
+  question_type: QuestionType;
+  answer_value: unknown;
+  answered_at: string | null;
+}
+
+/** GET /applications/{id}/assessments/review — one attempt, every question
+ * with its answer, for HR/admin candidate comparison. */
+export interface AttemptReview {
+  attempt_id: string;
+  template_type: TemplateType;
+  template_title: string;
+  status: AttemptStatus;
+  started_at: string | null;
+  completed_at: string | null;
+  total_questions: number;
+  answered_count: number;
+  reopen_count: number;
+  questions: AttemptReviewQuestion[];
 }
 
 export interface StatusStats {

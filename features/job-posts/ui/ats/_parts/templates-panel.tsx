@@ -37,11 +37,13 @@ function Slot({
   kind,
   label,
   currentId,
+  locked,
 }: {
   job: JobPost;
   kind: TemplateKind;
   label: string;
   currentId: string | null;
+  locked: boolean;
 }) {
   const dispatch = useAppDispatch();
   const { templateOptions, templates } = useJobPostFormOptions();
@@ -94,7 +96,12 @@ function Slot({
               variant="outline"
               size="sm"
               onClick={detach}
-              disabled={busy}
+              disabled={busy || locked}
+              title={
+                locked
+                  ? "Move the job post back to draft to change assessments"
+                  : undefined
+              }
             >
               Remove
             </Button>
@@ -118,11 +125,15 @@ function Slot({
 }
 
 export function TemplatesPanel({ job }: { job: JobPost }) {
+  const locked = job.status === "published";
   return (
     <div className="space-y-3">
       <p className="text-muted-foreground text-sm">
-        Applicants complete the attached assessments before prescreening review
-        (0–3, none mandatory).
+        All three assessments must be attached before this job post can be
+        published. Applicants complete them before prescreening review.
+        {locked
+          ? " This job post is published — move it back to draft to change assessments."
+          : ""}
       </p>
       {KINDS.map(({ kind, label, field }) => (
         <Slot
@@ -131,6 +142,7 @@ export function TemplatesPanel({ job }: { job: JobPost }) {
           kind={kind}
           label={label}
           currentId={job[field] as string | null}
+          locked={locked}
         />
       ))}
     </div>

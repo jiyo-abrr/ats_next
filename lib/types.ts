@@ -31,6 +31,20 @@ export interface Paginated<T> {
 
 // ---- Enum unions (StrEnum values from the backend) ----
 
+export type CurrencyCode =
+  | "PHP"
+  | "USD"
+  | "EUR"
+  | "GBP"
+  | "SGD"
+  | "AUD"
+  | "CAD"
+  | "JPY"
+  | "HKD"
+  | "MYR"
+  | "INR"
+  | "CNY";
+
 export type EmploymentType =
   | "full_time"
   | "part_time"

@@ -37,9 +37,20 @@ export function DetailsPanel({ job }: { job: JobPost }) {
     }
   });
 
+  const assessmentsComplete =
+    !!job.pre_assessment_template_id &&
+    !!job.culture_fit_template_id &&
+    !!job.technical_assessment_template_id;
+
   return (
     <form onSubmit={onSubmit} className="space-y-6">
-      <JobPostForm form={form} positions={positions} addresses={addresses} />
+      <JobPostForm
+        form={form}
+        positions={positions}
+        addresses={addresses}
+        assessmentsComplete={assessmentsComplete}
+        currentStatus={job.status}
+      />
       <div className="flex justify-end">
         <Button
           type="submit"

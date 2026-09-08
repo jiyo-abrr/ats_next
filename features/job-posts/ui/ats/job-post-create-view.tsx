@@ -54,7 +54,12 @@ export function JobPostCreateView() {
         description="Fill in the details — attach tags, exclusions and assessments after creating."
       />
       <form onSubmit={onSubmit} className="space-y-6">
-        <JobPostForm form={form} positions={positions} addresses={addresses} />
+        <JobPostForm
+          form={form}
+          positions={positions}
+          addresses={addresses}
+          assessmentsComplete={false}
+        />
         <div className="flex justify-end gap-2">
           <Button asChild type="button" variant="outline">
             <Link href="/ats/job-posts">Cancel</Link>

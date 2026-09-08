@@ -10,13 +10,17 @@ import {
   TextareaField,
 } from "@/components/form/fields";
 import type { ComboOption } from "@/components/form/async-combobox";
-import { EMPLOYMENT_TYPE_LABELS, JOB_POST_STATUS } from "@/lib/constants";
+import {
+  CURRENCY_OPTIONS,
+  EMPLOYMENT_TYPE_LABELS,
+  JOB_POST_STATUS,
+} from "@/lib/constants";
 import type { JobPostInput } from "@/features/job-posts/schema";
 
 const employmentOptions = Object.entries(EMPLOYMENT_TYPE_LABELS).map(
   ([value, label]) => ({ value, label }),
 );
-const statusOptions = Object.entries(JOB_POST_STATUS).map(([value, m]) => ({
+const allStatusOptions = Object.entries(JOB_POST_STATUS).map(([value, m]) => ({
   value,
   label: m.label,
 }));
@@ -25,11 +29,20 @@ export function JobPostForm({
   form,
   positions,
   addresses,
+  assessmentsComplete = true,
+  currentStatus,
 }: {
   form: UseFormReturn<JobPostInput>;
   positions: ComboOption[];
   addresses: ComboOption[];
+  /** All 3 assessments attached? When false, Published is not selectable. */
+  assessmentsComplete?: boolean;
+  currentStatus?: string;
 }) {
+  const canPublish = assessmentsComplete || currentStatus === "published";
+  const statusOptions = canPublish
+    ? allStatusOptions
+    : allStatusOptions.filter((o) => o.value !== "published");
   return (
     <FieldGroup>
       <TextField
@@ -64,15 +77,30 @@ export function JobPostForm({
           options={employmentOptions}
           required
         />
+        <div>
+          <SelectField
+            control={form.control}
+            name="status"
+            label="Status"
+            options={statusOptions}
+            required
+          />
+          {!canPublish ? (
+            <p className="text-muted-foreground mt-1.5 text-xs">
+              Attach all three assessments (Assessments tab) to publish this
+              job post.
+            </p>
+          ) : null}
+        </div>
+      </div>
+      <div className="grid gap-5 sm:grid-cols-4">
         <SelectField
           control={form.control}
-          name="status"
-          label="Status"
-          options={statusOptions}
+          name="currency"
+          label="Currency"
+          options={CURRENCY_OPTIONS}
           required
         />
-      </div>
-      <div className="grid gap-5 sm:grid-cols-3">
         <TextField
           control={form.control}
           name="salary_min"
@@ -125,6 +153,7 @@ export function jobPostFormValues(job?: {
   qualifications: string;
   salary_min: string | null;
   salary_max: string | null;
+  currency: string;
   employment_type: string;
   status: string;
   company_address_id: string;
@@ -138,6 +167,7 @@ export function jobPostFormValues(job?: {
     qualifications: job?.qualifications ?? "",
     salary_min: job?.salary_min ? String(Number(job.salary_min)) : "",
     salary_max: job?.salary_max ? String(Number(job.salary_max)) : "",
+    currency: (job?.currency ?? "PHP") as JobPostInput["currency"],
     employment_type: (job?.employment_type ??
       "full_time") as JobPostInput["employment_type"],
     status: (job?.status ?? "draft") as JobPostInput["status"],

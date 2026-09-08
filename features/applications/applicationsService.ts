@@ -4,6 +4,7 @@ import type {
   ApplicantRollup,
   Application,
   ApplicationAssessments,
+  AttemptReview,
   ApplicationReview,
   ApplicationSummary,
   StatusStats,
@@ -19,6 +20,9 @@ export const get = (id: string) => apiClient<Application>(`applications/${id}`);
 
 export const getAssessments = (id: string) =>
   apiClient<ApplicationAssessments>(`applications/${id}/assessments`);
+
+export const getAssessmentsReview = (id: string) =>
+  apiClient<AttemptReview[]>(`applications/${id}/assessments/review`);
 
 export const create = (jobPostId: string) =>
   apiClient<Application>("applications", {

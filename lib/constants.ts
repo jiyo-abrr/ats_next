@@ -78,3 +78,18 @@ export const ROLE_LABELS: Record<Role, string> = {
 
 // Pipeline rules (allowed transitions, can-withdraw) are NOT here — they come
 // off the API as `allowed_status_transitions` / `can_withdraw` on ApplicationOut.
+
+export const CURRENCY_OPTIONS: { value: string; label: string }[] = [
+  { value: "PHP", label: "₱ PHP — Philippine peso" },
+  { value: "USD", label: "$ USD — US dollar" },
+  { value: "EUR", label: "€ EUR — Euro" },
+  { value: "GBP", label: "£ GBP — Pound sterling" },
+  { value: "SGD", label: "S$ SGD — Singapore dollar" },
+  { value: "AUD", label: "A$ AUD — Australian dollar" },
+  { value: "CAD", label: "C$ CAD — Canadian dollar" },
+  { value: "JPY", label: "¥ JPY — Japanese yen" },
+  { value: "HKD", label: "HK$ HKD — Hong Kong dollar" },
+  { value: "MYR", label: "RM MYR — Malaysian ringgit" },
+  { value: "INR", label: "₹ INR — Indian rupee" },
+  { value: "CNY", label: "¥ CNY — Chinese yuan" },
+];
