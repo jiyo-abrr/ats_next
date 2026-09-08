@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus, Trash2 } from "lucide-react";
@@ -26,6 +27,7 @@ import {
 import { useCompanyAddresses } from "@/features/company-addresses/hooks";
 import { companyAddressesColumns } from "./company-addresses-columns";
 import { CompanyAddressForm } from "./company-address-form";
+import { CompanyAddressDetailsDialog } from "./company-address-details-dialog";
 
 const EMPTY: CompanyAddressInput = {
   label: "",
@@ -41,6 +43,7 @@ const EMPTY: CompanyAddressInput = {
 
 export function CompanyAddressesView() {
   const dispatch = useAppDispatch();
+  const [viewing, setViewing] = useState<CompanyAddress | null>(null);
   const {
     data,
     total,
@@ -124,6 +127,7 @@ export function CompanyAddressesView() {
         onRetry={refetch}
         sort={query.sort}
         onToggleSort={toggleSort}
+        onRowClick={setViewing}
         emptyMessage="No locations yet."
       />
 
@@ -160,6 +164,15 @@ export function CompanyAddressesView() {
           />
         ) : null}
       </EntityFormSheet>
+
+      <CompanyAddressDetailsDialog
+        address={viewing}
+        onOpenChange={(open) => !open && setViewing(null)}
+        onEdit={(address) => {
+          setViewing(null);
+          crud.openEdit(address);
+        }}
+      />
     </div>
   );
 }

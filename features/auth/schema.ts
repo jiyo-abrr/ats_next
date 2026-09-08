@@ -44,3 +44,6 @@ export const createHrAccountSchema = z.object({
   password: z.string().min(8, "At least 8 characters"),
 });
 export type CreateHrAccountInput = z.infer<typeof createHrAccountSchema>;
+
+export const updateUserSchema = createHrAccountSchema.omit({ password: true });
+export type UpdateUserInput = z.infer<typeof updateUserSchema>;

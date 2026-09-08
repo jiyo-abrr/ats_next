@@ -159,23 +159,75 @@ export function questionFormValues(q?: TemplateQuestion): QuestionInput {
   };
 }
 
-/** Human-readable config hints for a saved question — one line per hint.
- * Shared by the read-only view and the editable list. */
+const numberFormatter = new Intl.NumberFormat("en-US");
+const shortDateFormatter = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  day: "numeric",
+  year: "numeric",
+});
+
+function configNumber(value: unknown) {
+  const number = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(number) ? numberFormatter.format(number) : String(value);
+}
+
+function configDate(value: unknown) {
+  const text = String(value);
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(text);
+  if (!match) return text;
+
+  return shortDateFormatter.format(
+    new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3])),
+  );
+}
+
+function naturalList(items: string[]) {
+  if (items.length < 2) return items[0];
+  if (items.length === 2) return `${items[0]} or ${items[1]}`;
+  return `${items.slice(0, -1).join(", ")}, or ${items.at(-1)}`;
+}
+
+/** Plain-language constraints for a saved question. Shared by the viewer and editor. */
 export function questionConfigSummary(q: TemplateQuestion): string[] {
   const c = q.config ?? {};
   const bits: string[] = [];
   if (Array.isArray(c.options) && c.options.length) {
-    bits.push((c.options as string[]).join(" · "));
+    bits.push(`Options: ${naturalList(c.options as string[])}`);
   }
   if (c.min != null || c.max != null) {
-    bits.push(`range ${c.min ?? "–"}…${c.max ?? "–"}`);
+    const subject = q.question_type === "rating" ? "Rating" : "Number";
+    if (c.min != null && c.max != null) {
+      bits.push(
+        `${subject}: ${configNumber(c.min)} to ${configNumber(c.max)}`,
+      );
+    } else if (c.min != null) {
+      bits.push(`${subject}: at least ${configNumber(c.min)}`);
+    } else {
+      bits.push(`${subject}: up to ${configNumber(c.max)}`);
+    }
   }
   if (c.min_selections != null || c.max_selections != null) {
-    bits.push(`select ${c.min_selections ?? 0}–${c.max_selections ?? "∞"}`);
+    if (c.min_selections != null && c.max_selections != null) {
+      bits.push(
+        `Choose ${configNumber(c.min_selections)} to ${configNumber(c.max_selections)} options`,
+      );
+    } else if (c.min_selections != null) {
+      bits.push(`Choose at least ${configNumber(c.min_selections)} options`);
+    } else {
+      bits.push(`Choose up to ${configNumber(c.max_selections)} options`);
+    }
   }
-  if (c.max_length != null) bits.push(`≤ ${c.max_length} chars`);
+  if (c.max_length != null) {
+    bits.push(`Up to ${configNumber(c.max_length)} characters`);
+  }
   if (c.min_date != null || c.max_date != null) {
-    bits.push(`${c.min_date ?? "–"} → ${c.max_date ?? "–"}`);
+    if (c.min_date != null && c.max_date != null) {
+      bits.push(`Available ${configDate(c.min_date)} to ${configDate(c.max_date)}`);
+    } else if (c.min_date != null) {
+      bits.push(`Available from ${configDate(c.min_date)}`);
+    } else {
+      bits.push(`Available through ${configDate(c.max_date)}`);
+    }
   }
   return bits;
 }

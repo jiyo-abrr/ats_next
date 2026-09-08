@@ -1,4 +1,5 @@
 import { apiClient } from "@/lib/api/client";
+import type { Paginated } from "@/lib/types";
 import type { LoginInput, User } from "@/features/auth/schema";
 
 /**
@@ -45,3 +46,22 @@ export const createHrAccount = (body: Record<string, unknown>) =>
     method: "POST",
     body: JSON.stringify(body),
   });
+
+/** Admin-only: every account (any role) — the `/ats/rbac/users` list. */
+export const listUsers = (qs: string) =>
+  apiClient<Paginated<User>>(qs ? `auth/users?${qs}` : "auth/users");
+
+export const getUser = (id: string) => apiClient<User>(`auth/users/${id}`);
+
+export const updateUser = (id: string, body: Record<string, unknown>) =>
+  apiClient<User>(`auth/users/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(body),
+  });
+
+/** Applicant accounts only — the backend rejects this for staff roles. */
+export const deactivateUser = (id: string) =>
+  apiClient<User>(`auth/users/${id}/deactivate`, { method: "POST" });
+
+export const activateUser = (id: string) =>
+  apiClient<User>(`auth/users/${id}/activate`, { method: "POST" });

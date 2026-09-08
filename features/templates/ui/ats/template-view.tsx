@@ -1,7 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Clock, ListChecks, Pencil, Timer } from "lucide-react";
+import {
+  CalendarClock,
+  Clock,
+  FileText,
+  ListChecks,
+  Pencil,
+  Timer,
+} from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,7 +16,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { ErrorState } from "@/components/states";
-import { StatCard } from "@/components/stat-card";
 import { QUESTION_TYPE_LABELS } from "@/lib/constants";
 import type { QuestionType } from "@/lib/types";
 import { formatDate } from "@/lib/utils/format";
@@ -62,110 +68,105 @@ export function TemplateView({
   const editHref = `/ats/templates/${kind}/${id}/edit`;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <Breadcrumbs
         items={[
           { label: `${label} templates`, href: `/ats/templates/${kind}` },
           { label: template.title },
         ]}
       />
-      <Link
-        href={`/ats/templates/${kind}`}
-        className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm"
-      >
-        <ArrowLeft className="size-4" /> {label} templates
-      </Link>
-
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-semibold tracking-tight">
-            {template.title}
-          </h1>
-          <p className="text-muted-foreground text-sm">
-            {label} template · updated {formatDate(template.updated_at)}
-          </p>
-        </div>
-        <Button asChild size="sm">
-          <Link href={editHref}>
-            <Pencil /> Edit
-          </Link>
-        </Button>
-      </div>
-
-      {/* Content (left) + metrics (right) */}
-      <div className="grid items-start gap-4 lg:grid-cols-3">
-        <div className="space-y-4 lg:col-span-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Description</CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm">
-              {template.description ? (
-                <p className="whitespace-pre-wrap">{template.description}</p>
-              ) : (
-                <p className="text-muted-foreground italic">
-                  No description (internal note only).
-                </p>
-              )}
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>Applicant instructions</CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm">
-              {template.instructions ? (
-                <p className="whitespace-pre-wrap">{template.instructions}</p>
-              ) : (
-                <p className="text-muted-foreground italic">
-                  None set — applicants see only the questions.
-                </p>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-1">
-          <StatCard
-            label="Questions"
-            value={questions.length}
-            icon={ListChecks}
-          />
-          <StatCard
-            label="Attempt timer"
-            value={template.time_limit_minutes ?? "—"}
-            hint={
-              template.time_limit_minutes ? "minutes" : "no overall limit"
-            }
-            icon={Clock}
-          />
-          <StatCard
-            label="Timed questions"
-            value={timed}
-            hint="with a per-question clock"
-            icon={Timer}
-          />
-        </div>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-1.5">
-            <ListChecks className="text-muted-foreground size-4" />
-            Questions ({questions.length})
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {questions.length === 0 ? (
-            <p className="text-muted-foreground text-sm">
-              No questions yet.{" "}
-              <Link href={editHref} className="underline">
-                Add some
+      <div className="grid items-start gap-3 xl:grid-cols-12">
+        <Card size="sm" className="xl:col-span-8">
+          <CardContent className="flex flex-wrap items-start justify-between gap-4">
+            <div className="min-w-0 space-y-1.5">
+              <div className="text-muted-foreground flex items-center gap-1.5 text-xs font-medium">
+                <FileText className="size-3.5" />
+                {label} template
+              </div>
+              <h1 className="truncate text-2xl font-semibold tracking-tight">
+                {template.title}
+              </h1>
+              <p className="text-muted-foreground flex items-center gap-1.5 text-xs">
+                <CalendarClock className="size-3.5" />
+                Updated {formatDate(template.updated_at)}
+              </p>
+            </div>
+            <Button asChild size="sm" className="shrink-0">
+              <Link href={editHref}>
+                <Pencil /> Edit
               </Link>
-              .
-            </p>
-          ) : (
-            <>
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card size="sm" className="xl:col-span-4">
+          <CardContent className="grid grid-cols-3 divide-x">
+            <TemplateMetric
+              label="Questions"
+              value={questions.length}
+              icon={ListChecks}
+            />
+            <TemplateMetric
+              label="Attempt"
+              value={template.time_limit_minutes ?? "—"}
+              hint={template.time_limit_minutes ? "minutes" : "no limit"}
+              icon={Clock}
+            />
+            <TemplateMetric
+              label="Timed"
+              value={timed}
+              hint="questions"
+              icon={Timer}
+            />
+          </CardContent>
+        </Card>
+
+        <Card size="sm" className="xl:col-span-5">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-1.5">
+              <FileText className="text-muted-foreground size-4" />
+              Description
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm leading-6">
+            {template.description ? (
+              <p className="whitespace-pre-wrap">{template.description}</p>
+            ) : (
+              <p className="text-muted-foreground italic">
+                No internal description.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card size="sm" className="xl:col-span-7">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-1.5">
+              <ListChecks className="text-muted-foreground size-4" />
+              Applicant instructions
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm leading-6">
+            {template.instructions ? (
+              <p className="whitespace-pre-wrap">{template.instructions}</p>
+            ) : (
+              <p className="text-muted-foreground italic">
+                None set — applicants see only the questions.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card size="sm" className="xl:col-span-12">
+          <CardHeader className="gap-2 sm:flex sm:flex-row sm:items-center sm:justify-between">
+            <CardTitle className="flex items-center gap-1.5">
+              <ListChecks className="text-muted-foreground size-4" />
+              Questions
+              <span className="text-muted-foreground font-normal">
+                ({questions.length})
+              </span>
+            </CardTitle>
+            {questions.length > 0 ? (
               <div className="flex flex-wrap gap-1.5">
                 {Object.entries(typeCounts).map(([t, n]) => (
                   <Badge key={t} variant="secondary" className="font-normal">
@@ -173,40 +174,86 @@ export function TemplateView({
                   </Badge>
                 ))}
               </div>
-              <ol className="space-y-2">
-                {questions.map((q, i) => (
-                  <li
-                    key={q.id}
-                    className="flex items-start gap-3 rounded-lg border p-3"
-                  >
-                    <span className="text-muted-foreground w-5 shrink-0 pt-0.5 text-right text-sm tabular-nums">
-                      {i + 1}.
-                    </span>
-                    <div className="min-w-0 flex-1 space-y-1">
-                      <p className="text-sm font-medium">{q.prompt}</p>
-                      <div className="flex flex-wrap items-center gap-1.5">
+            ) : null}
+          </CardHeader>
+          <CardContent>
+            {questions.length === 0 ? (
+              <p className="text-muted-foreground text-sm">
+                No questions yet.{" "}
+                <Link href={editHref} className="underline">
+                  Add some
+                </Link>
+                .
+              </p>
+            ) : (
+              <ol className="overflow-hidden rounded-lg border divide-y">
+                {questions.map((q, i) => {
+                  const config = questionConfigSummary(q);
+
+                  return (
+                    <li
+                      key={q.id}
+                      className="grid gap-2 p-3 sm:grid-cols-[1.75rem_minmax(0,1fr)_auto] sm:items-start"
+                    >
+                      <span className="bg-muted text-muted-foreground grid size-7 place-items-center rounded-md text-xs font-medium tabular-nums">
+                        {i + 1}
+                      </span>
+                      <div className="min-w-0 space-y-1.5">
+                        <p className="text-sm font-medium leading-5">
+                          {q.prompt}
+                        </p>
+                        {config.length > 0 ? (
+                          <p className="text-muted-foreground text-xs leading-5">
+                            {config.join(" · ")}
+                          </p>
+                        ) : null}
+                      </div>
+                      <div className="flex flex-wrap items-center gap-1.5 sm:justify-end">
                         <Badge variant="secondary" className="font-normal">
                           {QUESTION_TYPE_LABELS[q.question_type]}
                         </Badge>
                         {q.time_limit_seconds ? (
                           <Badge variant="outline" className="font-normal">
+                            <Timer className="size-3" />
                             {q.time_limit_seconds}s
                           </Badge>
                         ) : null}
                       </div>
-                      {questionConfigSummary(q).map((s, j) => (
-                        <p key={j} className="text-muted-foreground text-xs">
-                          {s}
-                        </p>
-                      ))}
-                    </div>
-                  </li>
-                ))}
+                    </li>
+                  );
+                })}
               </ol>
-            </>
-          )}
-        </CardContent>
-      </Card>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
+function TemplateMetric({
+  label,
+  value,
+  hint,
+  icon: Icon,
+}: {
+  label: string;
+  value: number | string;
+  hint?: string;
+  icon: React.ComponentType<{ className?: string }>;
+}) {
+  return (
+    <div className="min-w-0 space-y-1 px-3 first:pl-0 last:pr-0">
+      <div className="text-muted-foreground flex items-center gap-1 text-[11px] font-medium leading-4">
+        <Icon className="size-3.5 shrink-0" />
+        <span className="truncate">{label}</span>
+      </div>
+      <p className="text-xl leading-5 font-semibold tracking-tight">{value}</p>
+      {hint ? (
+        <p className="text-muted-foreground truncate text-[11px] leading-4">
+          {hint}
+        </p>
+      ) : null}
     </div>
   );
 }

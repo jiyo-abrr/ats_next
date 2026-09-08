@@ -11,6 +11,7 @@ import assessments from "./assessmentsSlice";
 import dashboard from "./dashboardSlice";
 import templates from "./templatesSlice";
 import rbac from "./rbacSlice";
+import users from "./usersSlice";
 
 export const makeStore = () =>
   configureStore({
@@ -25,6 +26,7 @@ export const makeStore = () =>
       dashboard,
       templates,
       rbac,
+      users,
     },
     middleware: (getDefault) => getDefault().concat(toastErrorMiddleware),
   });

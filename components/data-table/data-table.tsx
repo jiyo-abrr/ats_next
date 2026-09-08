@@ -43,6 +43,8 @@ export interface DataTableProps<T> {
   emptyMessage?: string;
   skeletonRows?: number;
   getRowHref?: (row: T) => string;
+  /** Ignored when `getRowHref` is also set (that one wins). */
+  onRowClick?: (row: T) => void;
 }
 
 export function DataTable<T>({
@@ -56,6 +58,7 @@ export function DataTable<T>({
   emptyMessage = "Nothing here yet.",
   skeletonRows = 8,
   getRowHref,
+  onRowClick,
 }: DataTableProps<T>) {
   const router = useRouter();
   // eslint-disable-next-line react-hooks/incompatible-library
@@ -157,12 +160,17 @@ export function DataTable<T>({
             ) : (
               table.getRowModel().rows.map((row) => {
                 const href = getRowHref?.(row.original);
+                const clickable = !!href || !!onRowClick;
                 return (
                   <TableRow
                     key={row.id}
-                    className={cn(href && "hover:bg-muted/50 cursor-pointer")}
+                    className={cn(clickable && "hover:bg-muted/50 cursor-pointer")}
                     onClick={
-                      href ? () => router.push(href) : undefined
+                      href
+                        ? () => router.push(href)
+                        : onRowClick
+                          ? () => onRowClick(row.original)
+                          : undefined
                     }
                   >
                     {row.getVisibleCells().map((cell) => (

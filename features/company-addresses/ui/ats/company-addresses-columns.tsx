@@ -1,7 +1,7 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { Pencil } from "lucide-react";
 
-import { RowActions } from "@/components/data-table/row-actions";
+import { Button } from "@/components/ui/button";
 import type { CompanyAddress } from "@/features/company-addresses/schema";
 
 export function companyAddressesColumns(
@@ -40,11 +40,17 @@ export function companyAddressesColumns(
       header: "",
       meta: { className: "w-12" },
       cell: ({ row }) => (
-        <RowActions
-          actions={[
-            { label: "Edit", icon: Pencil, onSelect: () => onEdit(row.original) },
-          ]}
-        />
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          onClick={(e) => {
+            e.stopPropagation();
+            onEdit(row.original);
+          }}
+          aria-label="Edit"
+        >
+          <Pencil />
+        </Button>
       ),
     },
   ];

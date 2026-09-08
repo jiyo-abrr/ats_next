@@ -16,7 +16,12 @@ import {
   createHrAccountSchema,
 } from "@/features/auth/schema";
 
-export function CreateHrAccountForm() {
+export function CreateHrAccountForm({
+  onCreated,
+}: {
+  /** Called after a successful create, instead of resetting the form in place. */
+  onCreated?: () => void;
+}) {
   const [busy, setBusy] = useState(false);
   const form = useForm<CreateHrAccountInput>({
     resolver: zodResolver(createHrAccountSchema),
@@ -38,7 +43,11 @@ export function CreateHrAccountForm() {
         middle_initial: values.middle_initial || null,
       });
       toast.success(`HR account created for ${values.email}`);
-      form.reset();
+      if (onCreated) {
+        onCreated();
+      } else {
+        form.reset();
+      }
     } catch (e) {
       toast.error(errorMessage(e));
     } finally {
