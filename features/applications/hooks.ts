@@ -228,3 +228,61 @@ export function useApplicantApplications(applicantId: string) {
     refetch,
   };
 }
+
+/** Job-post hiring-pipeline tab — one stage at a time, paginated. `stage` is a
+ * URL filter that maps to one or more application statuses. */
+const PIPELINE_STAGE_STATUSES: Record<string, string[]> = {
+  applied: ["applied"],
+  prescreening: ["prescreening"],
+  interview: ["interview"],
+  hired: ["success"],
+  closed: ["denied", "failed", "disqualified", "withdrawn"],
+};
+
+export const PIPELINE_STAGES: { key: string; label: string }[] = [
+  { key: "applied", label: "Applied" },
+  { key: "prescreening", label: "Prescreening" },
+  { key: "interview", label: "Interview" },
+  { key: "hired", label: "Hired" },
+  { key: "closed", label: "Not proceeding" },
+];
+
+export function useJobPipelineStage(jobPostId: string) {
+  const dispatch = useAppDispatch();
+  const table = useTableQuery({ filterKeys: ["stage"] });
+  const stage = table.query.filters.stage || "applied";
+  const statuses =
+    PIPELINE_STAGE_STATUSES[stage] ?? PIPELINE_STAGE_STATUSES.applied;
+
+  const params = new URLSearchParams({
+    job_post_id: jobPostId,
+    page: String(table.query.page),
+    size: String(table.query.size),
+  });
+  statuses.forEach((s) => params.append("status", s));
+  const qs = params.toString();
+
+  const { review, reviewTotal, reviewPages, reviewLoading, reviewError } =
+    useAppSelector((s) => s.applications);
+
+  useEffect(() => {
+    dispatch(fetchApplicationsForReview(qs));
+  }, [dispatch, qs]);
+
+  const refetch = useCallback(
+    () => dispatch(fetchApplicationsForReview(qs)),
+    [dispatch, qs],
+  );
+
+  return {
+    ...table,
+    stage,
+    setStage: (v: string) => table.setFilter("stage", v),
+    data: review,
+    total: reviewTotal,
+    pages: reviewPages,
+    loading: reviewLoading,
+    error: reviewError,
+    refetch,
+  };
+}

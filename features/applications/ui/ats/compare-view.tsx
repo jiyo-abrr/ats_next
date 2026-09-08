@@ -2,9 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 
-import { Breadcrumbs } from "@/components/breadcrumbs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StatusBadge } from "@/components/status-badge";
@@ -137,29 +135,9 @@ export function CompareView({ jobId }: { jobId: string }) {
 
   return (
     <div className="space-y-5">
-      <Breadcrumbs
-        items={[
-          { label: "Job posts", href: "/ats/job-posts" },
-          { label: job?.job_title ?? "Job post", href: `/ats/job-posts/${jobId}` },
-          { label: "Compare applicants" },
-        ]}
-      />
-      <Link
-        href={`/ats/job-posts/${jobId}`}
-        className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm"
-      >
-        <ArrowLeft className="size-4" /> Back to job post
-      </Link>
-
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">
-          Compare applicants
-        </h1>
-        <p className="text-muted-foreground text-sm">
-          {job?.job_title ? `${job.job_title} · ` : ""}résumé and assessments side
-          by side. Pick up to {MAX_COMPARE}.
-        </p>
-      </div>
+      <p className="text-muted-foreground text-sm">
+        Résumé and assessments side by side. Pick up to {MAX_COMPARE}.
+      </p>
 
       {appsError ? (
         <ErrorState message={appsError} onRetry={() => setReloadKey((k) => k + 1)} />
