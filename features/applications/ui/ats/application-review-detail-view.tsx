@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { ArrowLeft, CalendarClock } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,6 +24,7 @@ import { ReviewAssessments } from "./_parts/review-assessments";
 const DEADLINE_PHASE = new Set(["applied", "disqualified"]);
 
 export function ApplicationReviewDetailView({ id }: { id: string }) {
+  const fromApplicant = useSearchParams().get("from") === "applicant";
   const { application: app, loading, error, acting, refetch } =
     useApplication(id);
   const { job } = useJobPost(app?.job_post_id ?? "");
@@ -51,6 +53,11 @@ export function ApplicationReviewDetailView({ id }: { id: string }) {
   const applicantName = reviewRow
     ? `${reviewRow.applicant_first_name} ${reviewRow.applicant_last_name}`
     : "Applicant";
+  // When reached from an applicant's page, Back / breadcrumb return there
+  // rather than to the full applications list.
+  const backToApplicant = fromApplicant
+    ? { label: applicantName, href: `/ats/applicants/${app.applicant_id}` }
+    : { label: "Applications", href: "/ats/applications" };
   const showDeadline =
     app.assessment_deadline && DEADLINE_PHASE.has(app.status);
 
@@ -58,15 +65,15 @@ export function ApplicationReviewDetailView({ id }: { id: string }) {
     <div className="space-y-6">
       <Breadcrumbs
         items={[
-          { label: "Applications", href: "/ats/applications" },
-          { label: applicantName },
+          { label: backToApplicant.label, href: backToApplicant.href },
+          { label: fromApplicant ? "Application" : applicantName },
         ]}
       />
       <Link
-        href="/ats/applications"
+        href={backToApplicant.href}
         className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm"
       >
-        <ArrowLeft className="size-4" /> Applications
+        <ArrowLeft className="size-4" /> {backToApplicant.label}
       </Link>
 
       <div className="flex flex-wrap items-start justify-between gap-3">

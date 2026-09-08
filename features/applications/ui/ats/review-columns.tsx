@@ -52,3 +52,9 @@ export const reviewColumns: ColumnDef<ApplicationReview, unknown>[] = [
 export const applicantColumns = reviewColumns.filter(
   (c) => !("accessorKey" in c && c.accessorKey === "job_title"),
 );
+
+/** For an applicant's own page — the review table minus the Applicant column
+ * (every row is the same person). */
+export const applicantApplicationColumns = reviewColumns.filter(
+  (c) => c.id !== "applicant",
+);

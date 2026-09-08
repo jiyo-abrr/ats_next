@@ -1,6 +1,7 @@
 import { apiClient, apiBlob } from "@/lib/api/client";
 import type { Paginated } from "@/lib/types";
 import type {
+  ApplicantRollup,
   Application,
   ApplicationAssessments,
   ApplicationReview,
@@ -35,6 +36,11 @@ export const resumeBlob = (id: string) =>
 export const listForReview = (qs: string) =>
   apiClient<Paginated<ApplicationReview>>(
     qs ? `applications?${qs}` : "applications",
+  );
+
+export const listApplicants = (qs: string) =>
+  apiClient<Paginated<ApplicantRollup>>(
+    qs ? `applications/applicants?${qs}` : "applications/applicants",
   );
 
 export const updateStatus = (id: string, status: string) =>

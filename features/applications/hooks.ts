@@ -4,7 +4,9 @@ import { useCallback, useEffect } from "react";
 
 import { useAppDispatch, useAppSelector } from "@/lib/hooks/redux";
 import { useTableQuery } from "@/lib/hooks/use-table-query";
+import { buildBackendParams } from "@/lib/utils/query";
 import {
+  fetchApplicants,
   fetchApplication,
   fetchApplicationAssessments,
   fetchApplicationsForReview,
@@ -153,4 +155,76 @@ export function useApplicationAssessments(id: string) {
   }, [dispatch, id]);
 
   return { assessments, loading: assessmentsLoading, refetch };
+}
+
+/** ATS applicant-centric list — one row per person who has applied, with a
+ * name/email search. Backed by GET /applications/applicants. */
+export function useApplicants() {
+  const dispatch = useAppDispatch();
+  const table = useTableQuery();
+  const qs = buildBackendParams(table.query).toString();
+
+  const {
+    applicants,
+    applicantsTotal,
+    applicantsPages,
+    applicantsLoading,
+    applicantsError,
+  } = useAppSelector((s) => s.applications);
+
+  useEffect(() => {
+    dispatch(fetchApplicants(qs));
+  }, [dispatch, qs]);
+
+  const refetch = useCallback(
+    () => dispatch(fetchApplicants(qs)),
+    [dispatch, qs],
+  );
+
+  return {
+    ...table,
+    data: applicants,
+    total: applicantsTotal,
+    pages: applicantsPages,
+    loading: applicantsLoading,
+    error: applicantsError,
+    refetch,
+  };
+}
+
+/** Every application belonging to one applicant — the review list scoped to
+ * `applicant_id`, with a status sub-filter. Shares the review slice. */
+export function useApplicantApplications(applicantId: string) {
+  const dispatch = useAppDispatch();
+  const table = useTableQuery({ filterKeys: ["status"] });
+  const params = new URLSearchParams({
+    applicant_id: applicantId,
+    page: String(table.query.page),
+    size: String(table.query.size),
+  });
+  if (table.query.filters.status)
+    params.set("status", table.query.filters.status);
+  const qs = params.toString();
+
+  const { review, reviewTotal, reviewPages, reviewLoading, reviewError } =
+    useAppSelector((s) => s.applications);
+
+  useEffect(() => {
+    dispatch(fetchApplicationsForReview(qs));
+  }, [dispatch, qs]);
+
+  const refetch = useCallback(
+    () => dispatch(fetchApplicationsForReview(qs)),
+    [dispatch, qs],
+  );
+
+  return {
+    ...table,
+    data: review,
+    total: reviewTotal,
+    pages: reviewPages,
+    loading: reviewLoading,
+    error: reviewError,
+    refetch,
+  };
 }

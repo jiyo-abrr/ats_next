@@ -11,6 +11,15 @@ export interface ApplicationSummary {
   job_title: string;
 }
 
+export interface ApplicantRollup {
+  applicant_id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  application_count: number;
+  latest_applied_at: string;
+}
+
 export interface Application {
   id: string;
   job_post_id: string;

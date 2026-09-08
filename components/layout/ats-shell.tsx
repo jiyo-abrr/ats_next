@@ -14,6 +14,7 @@ import {
   PanelLeftOpen,
   ShieldCheck,
   Tags,
+  UserSearch,
   Users,
 } from "lucide-react";
 
@@ -35,6 +36,7 @@ const nav: NavItem[] = [
   { href: "/ats", label: "Dashboard", icon: LayoutDashboard },
   { href: "/ats/job-posts", label: "Job posts", icon: Briefcase },
   { href: "/ats/applications", label: "Applications", icon: ClipboardList },
+  { href: "/ats/applicants", label: "Applicants", icon: UserSearch },
   { href: "/ats/positions", label: "Positions", icon: Users },
   { href: "/ats/tags", label: "Tags", icon: Tags },
   { href: "/ats/company-addresses", label: "Locations", icon: Building2 },

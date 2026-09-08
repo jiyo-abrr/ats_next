@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 import * as applicationsService from "@/features/applications/applicationsService";
 import type {
+  ApplicantRollup,
   Application,
   ApplicationAssessments,
   ApplicationReview,
@@ -21,6 +22,12 @@ interface ApplicationsState {
   reviewPages: number;
   reviewLoading: boolean;
   reviewError: string | null;
+
+  applicants: ApplicantRollup[];
+  applicantsTotal: number;
+  applicantsPages: number;
+  applicantsLoading: boolean;
+  applicantsError: string | null;
 
   current: Application | null;
   currentLoading: boolean;
@@ -44,6 +51,11 @@ const initialState: ApplicationsState = {
   reviewPages: 0,
   reviewLoading: false,
   reviewError: null,
+  applicants: [],
+  applicantsTotal: 0,
+  applicantsPages: 0,
+  applicantsLoading: false,
+  applicantsError: null,
   current: null,
   currentLoading: false,
   currentError: null,
@@ -76,6 +88,10 @@ export const withdrawApplication = createAsyncThunk(
 export const fetchApplicationsForReview = createAsyncThunk(
   "applications/fetchReview",
   async (qs: string) => applicationsService.listForReview(qs),
+);
+export const fetchApplicants = createAsyncThunk(
+  "applications/fetchApplicants",
+  async (qs: string) => applicationsService.listApplicants(qs),
 );
 export const changeApplicationStatus = createAsyncThunk(
   "applications/changeStatus",
@@ -169,6 +185,21 @@ const applicationsSlice = createSlice({
       .addCase(fetchApplicationsForReview.rejected, (state, action) => {
         state.reviewLoading = false;
         state.reviewError = action.error.message ?? "Failed to load applications";
+      })
+      .addCase(fetchApplicants.pending, (state) => {
+        state.applicantsLoading = true;
+        state.applicantsError = null;
+      })
+      .addCase(fetchApplicants.fulfilled, (state, action) => {
+        state.applicantsLoading = false;
+        state.applicants = action.payload.items;
+        state.applicantsTotal = action.payload.total;
+        state.applicantsPages = action.payload.pages;
+      })
+      .addCase(fetchApplicants.rejected, (state, action) => {
+        state.applicantsLoading = false;
+        state.applicantsError =
+          action.error.message ?? "Failed to load applicants";
       })
       .addCase(withdrawApplication.fulfilled, (state, action) => {
         state.current = action.payload;
