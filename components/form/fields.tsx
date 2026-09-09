@@ -25,6 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { AsyncCombobox, type ComboOption } from "@/components/form/async-combobox";
+import { RichTextEditor } from "@/components/rich-text-editor";
 
 interface BaseProps<T extends FieldValues> {
   control: Control<T>;
@@ -109,6 +110,37 @@ export function TextareaField<T extends FieldValues>({
             placeholder={placeholder}
             value={field.value ?? ""}
             aria-invalid={!!fieldState.error}
+          />
+          {description ? <FieldDescription>{description}</FieldDescription> : null}
+          <FieldError errors={fieldState.error ? [fieldState.error] : undefined} />
+        </Field>
+      )}
+    />
+  );
+}
+
+export function RichTextField<T extends FieldValues>({
+  control,
+  name,
+  label,
+  description,
+  placeholder,
+  required,
+}: BaseProps<T>) {
+  return (
+    <Controller
+      control={control}
+      name={name}
+      render={({ field, fieldState }) => (
+        <Field data-invalid={!!fieldState.error}>
+          <LabelRow htmlFor={name} label={label} required={required} />
+          <RichTextEditor
+            id={name}
+            value={field.value ?? ""}
+            onChange={field.onChange}
+            onBlur={field.onBlur}
+            invalid={!!fieldState.error}
+            placeholder={placeholder}
           />
           {description ? <FieldDescription>{description}</FieldDescription> : null}
           <FieldError errors={fieldState.error ? [fieldState.error] : undefined} />

@@ -11,12 +11,13 @@ import { EMPLOYMENT_TYPE_LABELS } from "@/lib/constants";
 import { salaryLabel } from "@/lib/utils/format";
 import { ApplyButton } from "./apply-button";
 import { useJobPost } from "@/features/job-posts/hooks";
+import { RichText } from "@/components/rich-text-editor";
 
 function Prose({ title, body }: { title: string; body: string }) {
   return (
     <section className="space-y-2">
       <h2 className="text-sm font-semibold tracking-wide uppercase">{title}</h2>
-      <p className="text-muted-foreground text-sm whitespace-pre-wrap">{body}</p>
+      <RichText html={body} className="text-muted-foreground" />
     </section>
   );
 }

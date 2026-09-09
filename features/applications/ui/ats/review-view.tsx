@@ -37,7 +37,7 @@ export function ReviewView() {
 
   useEffect(() => {
     jobPostsService
-      .getAll("size=200&sort=created_at:desc")
+      .getAll("size=100&sort=created_at:desc")
       .then((r) =>
         setJobOptions(r.items.map((j) => ({ value: j.id, label: j.job_title }))),
       )

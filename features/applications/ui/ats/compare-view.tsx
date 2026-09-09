@@ -1,7 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Download, Eye } from "lucide-react";
+import Link from "next/link";
+import {
+  Download,
+  Eye,
+  FileArchive,
+  FileSpreadsheet,
+  Upload,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/data-table/data-table";
@@ -21,9 +28,11 @@ import { resumeBlob } from "@/features/applications/applicationsService";
 import type {
   ApplicationScorecard,
   JobAssessmentReviewRow,
+  JobEvaluationRow,
 } from "@/features/applications/schema";
 import { useJobPost } from "@/features/job-posts/hooks";
 import { AnswerValue } from "./_parts/answer-value";
+import { parseEvaluationCsv } from "@/features/applications/evaluation-csv";
 import type { ColumnDef } from "@tanstack/react-table";
 
 const TEMPLATE_ORDER: TemplateType[] = [
@@ -31,6 +40,12 @@ const TEMPLATE_ORDER: TemplateType[] = [
   "culture_fit",
   "technical",
 ];
+
+const RECOMMENDATION_LABELS: Record<string, string> = {
+  advance: "Advance",
+  hold: "Hold",
+  reject: "Reject",
+};
 
 function duration(start: string | null, end: string | null) {
   if (!start || !end) return null;
@@ -215,6 +230,35 @@ function ScorecardTable({ jobId }: { jobId: string }) {
         },
       }),
     ),
+    {
+      id: "evaluation",
+      header: "AI evaluation",
+      meta: { className: "w-40" },
+      cell: ({ row }) => {
+        const e = row.original.evaluation;
+        if (!e || (e.recommendation === null && e.fit_score === null))
+          return <span className="text-muted-foreground text-xs">—</span>;
+        const tone =
+          e.recommendation === "advance"
+            ? "success"
+            : e.recommendation === "reject"
+              ? "danger"
+              : "warning";
+        return (
+          <div className="space-y-1">
+            {e.recommendation ? (
+              <StatusBadge
+                label={RECOMMENDATION_LABELS[e.recommendation]}
+                tone={tone}
+              />
+            ) : null}
+            {e.fit_score !== null ? (
+              <p className="text-muted-foreground text-xs">Fit {e.fit_score}/100</p>
+            ) : null}
+          </div>
+        );
+      },
+    },
   ];
 
   return (
@@ -341,12 +385,301 @@ function AssessmentAnswersTable({
   );
 }
 
+const RATING_META: Record<
+  string,
+  { label: string; tone: "success" | "warning" | "danger" | "neutral" }
+> = {
+  strong: { label: "Strong", tone: "success" },
+  qualified: { label: "Qualified", tone: "warning" },
+  below_bar: { label: "Below bar", tone: "danger" },
+  na: { label: "N/A", tone: "neutral" },
+};
+const RESUME_DIMS = [
+  "relevant_work_experience",
+  "industry_experience",
+  "employment_gap",
+  "tenure_stability",
+  "career_progression",
+  "job_hopping_risk",
+  "educational_background",
+  "certifications_licenses",
+  "technical_skills_match",
+];
+const ASSESSMENT_DIMS = ["pre_assessment", "culture_fit", "technical"];
+
+function prettyDim(d: string) {
+  return d.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function EvaluationCompareTable({ jobId }: { jobId: string }) {
+  const p = usePaged<JobEvaluationRow>((qs) =>
+    applicationsService.getJobEvaluations(`job_post_id=${jobId}&${qs}`),
+  );
+
+  const rated = p.items.filter((r) => r.evaluation);
+  if (!p.loading && rated.length === 0) {
+    return (
+      <p className="text-muted-foreground text-sm">
+        No AI evaluations imported yet. Export the pack, run it through ChatGPT,
+        then import the results CSV.
+      </p>
+    );
+  }
+
+  const cell = (r: JobEvaluationRow, category: string, dim: string) => {
+    const score = r.evaluation?.scores.find(
+      (s) => s.category === category && s.dimension === dim,
+    );
+    if (!score) return <span className="text-muted-foreground text-xs">—</span>;
+    const m = RATING_META[score.rating] ?? RATING_META.na;
+    return (
+      <div className="space-y-1">
+        <StatusBadge label={m.label} tone={m.tone} />
+        {score.reason ? (
+          <p className="text-muted-foreground text-xs leading-snug">
+            {score.reason}
+          </p>
+        ) : null}
+      </div>
+    );
+  };
+
+  const section = (title: string, category: string, dims: string[]) => (
+    <>
+      <tr className="bg-muted/40">
+        <td
+          className="p-2 text-xs font-semibold tracking-wide uppercase"
+          colSpan={p.items.length + 1}
+        >
+          {title}
+        </td>
+      </tr>
+      {dims.map((dim) => (
+        <tr key={dim} className="border-b last:border-0">
+          <td className="p-2 align-top font-medium">{prettyDim(dim)}</td>
+          {p.items.map((r) => (
+            <td key={r.application_id} className="p-2 align-top">
+              {cell(r, category, dim)}
+            </td>
+          ))}
+        </tr>
+      ))}
+    </>
+  );
+
+  return (
+    <div className="space-y-3">
+      <div className="overflow-x-auto rounded-lg border">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b">
+              <th className="w-52 p-2 text-left font-medium">Applicant</th>
+              {p.items.map((r) => {
+                const e = r.evaluation;
+                const rec = e?.recommendation
+                  ? RECOMMENDATION_LABELS[e.recommendation]
+                  : null;
+                const tone =
+                  e?.recommendation === "advance"
+                    ? "success"
+                    : e?.recommendation === "reject"
+                      ? "danger"
+                      : "warning";
+                return (
+                  <th
+                    key={r.application_id}
+                    className="min-w-[220px] p-2 text-left align-top font-medium"
+                  >
+                    <Link
+                      href={`/ats/applications/${r.application_id}`}
+                      className="hover:underline"
+                    >
+                      {r.applicant_first_name} {r.applicant_last_name}
+                    </Link>
+                    <div className="mt-1 flex flex-wrap items-center gap-1 font-normal">
+                      {rec ? <StatusBadge label={rec} tone={tone} /> : null}
+                      {e?.fit_score != null ? (
+                        <span className="text-muted-foreground text-xs">
+                          {e.fit_score}/100
+                        </span>
+                      ) : null}
+                    </div>
+                    {e?.seniority_assessed ? (
+                      <p className="text-muted-foreground text-xs font-normal">
+                        {e.seniority_assessed}
+                      </p>
+                    ) : null}
+                  </th>
+                );
+              })}
+            </tr>
+          </thead>
+          <tbody>
+            {p.items.some((r) => r.evaluation?.summary) ? (
+              <tr className="border-b">
+                <td className="p-2 align-top font-medium">Summary</td>
+                {p.items.map((r) => (
+                  <td
+                    key={r.application_id}
+                    className="text-muted-foreground p-2 align-top text-xs"
+                  >
+                    {r.evaluation?.summary ?? "—"}
+                  </td>
+                ))}
+              </tr>
+            ) : null}
+            {section("Résumé", "resume", RESUME_DIMS)}
+            {section("Assessments", "assessment", ASSESSMENT_DIMS)}
+          </tbody>
+        </table>
+      </div>
+      <DataTablePagination
+        page={p.page}
+        size={p.size}
+        total={p.total}
+        pages={p.pages}
+        onPageChange={p.setPage}
+        onSizeChange={p.setSize}
+        isLoading={p.loading}
+      />
+    </div>
+  );
+}
+
+function ImportResultsButton({
+  jobId,
+  onImported,
+}: {
+  jobId: string;
+  onImported: () => void;
+}) {
+  const [busy, setBusy] = useState(false);
+  const pick = () => {
+    const el = document.createElement("input");
+    el.type = "file";
+    el.accept = ".csv,text/csv,application/json,.json";
+    el.onchange = async () => {
+      const file = el.files?.[0];
+      if (!file) return;
+      setBusy(true);
+      try {
+        const text = await file.text();
+        const isCsv =
+          file.name.toLowerCase().endsWith(".csv") ||
+          (!file.name.toLowerCase().endsWith(".json") &&
+            !text.trimStart().startsWith("{"));
+        const payload = isCsv
+          ? parseEvaluationCsv(text, jobId)
+          : (() => {
+              const p = JSON.parse(text);
+              if (p && typeof p === "object" && !p.job_post_id)
+                p.job_post_id = jobId;
+              return p;
+            })();
+        const res = await applicationsService.importEvaluations(payload);
+        toast.success(
+          `Imported ${res.imported} evaluation${res.imported === 1 ? "" : "s"}` +
+            (res.skipped.length ? ` · ${res.skipped.length} skipped` : ""),
+        );
+        onImported();
+      } catch (e) {
+        toast.error(
+          e instanceof SyntaxError
+            ? "That file isn't valid JSON"
+            : errorMessage(e),
+        );
+      } finally {
+        setBusy(false);
+      }
+    };
+    el.click();
+  };
+  return (
+    <Button variant="outline" size="sm" onClick={pick} disabled={busy}>
+      <Upload className="size-4" />
+      {busy ? "Importing…" : "Import evaluation results"}
+    </Button>
+  );
+}
+
+function triggerDownload(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function DownloadButton({
+  icon: Icon,
+  label,
+  busyLabel,
+  fetcher,
+  filename,
+}: {
+  icon: typeof FileArchive;
+  label: string;
+  busyLabel: string;
+  fetcher: () => Promise<Blob>;
+  filename: string;
+}) {
+  const [busy, setBusy] = useState(false);
+  const run = async () => {
+    setBusy(true);
+    try {
+      triggerDownload(await fetcher(), filename);
+    } catch (e) {
+      toast.error(errorMessage(e));
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <Button variant="outline" size="sm" onClick={run} disabled={busy}>
+      <Icon className="size-4" />
+      {busy ? busyLabel : label}
+    </Button>
+  );
+}
+
 export function CompareView({ jobId }: { jobId: string }) {
+  const [scorecardKey, setScorecardKey] = useState(0);
   return (
     <div className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-muted-foreground text-sm">
+          Review résumés & assessments here. Or: export the pack → run it through
+          ChatGPT (paste PROMPT.md) → import the filled evaluation-results.csv.
+        </p>
+        <div className="flex flex-wrap gap-2">
+          <DownloadButton
+            icon={FileArchive}
+            label="Export evaluation pack"
+            busyLabel="Preparing…"
+            fetcher={() => applicationsService.exportEvaluationPack(jobId)}
+            filename="evaluation-pack.zip"
+          />
+          <ImportResultsButton
+            jobId={jobId}
+            onImported={() => setScorecardKey((k) => k + 1)}
+          />
+          <DownloadButton
+            icon={FileSpreadsheet}
+            label="Export CSV"
+            busyLabel="Exporting…"
+            fetcher={() => applicationsService.exportEvaluationsCsv(jobId)}
+            filename="evaluations.csv"
+          />
+        </div>
+      </div>
+
       <Tabs defaultValue="overview">
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="ai-evaluation">AI evaluation</TabsTrigger>
           {TEMPLATE_ORDER.map((t) => (
             <TabsTrigger key={t} value={t}>
               {TEMPLATE_TYPE_LABELS[t]}
@@ -359,7 +692,15 @@ export function CompareView({ jobId }: { jobId: string }) {
             Every applicant’s résumé and assessment progress. Open a row for the
             full review.
           </p>
-          <ScorecardTable jobId={jobId} />
+          <ScorecardTable key={scorecardKey} jobId={jobId} />
+        </TabsContent>
+
+        <TabsContent value="ai-evaluation" className="pt-3">
+          <p className="text-muted-foreground mb-3 text-sm">
+            The imported AI evaluation, dimension by dimension, side by side.
+            Hover a rating to see the reason.
+          </p>
+          <EvaluationCompareTable key={scorecardKey} jobId={jobId} />
         </TabsContent>
 
         {TEMPLATE_ORDER.map((t) => (

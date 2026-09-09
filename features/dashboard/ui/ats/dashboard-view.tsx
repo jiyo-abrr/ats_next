@@ -1,74 +1,80 @@
 "use client";
 
-import { Briefcase, ClipboardList } from "lucide-react";
+import Link from "next/link";
+import { Plus, RefreshCw } from "lucide-react";
 
-import { PageHeader } from "@/components/page-header";
-import { StatCard } from "@/components/stat-card";
+import { Button } from "@/components/ui/button";
 import { ErrorState } from "@/components/states";
-import { APPLICATION_STATUS, JOB_POST_STATUS } from "@/lib/constants";
+import { AnalyticsPanel } from "@/features/analytics/ui/ats/analytics-panel";
+import { useCurrentUser } from "@/features/auth/hooks";
 import { useDashboard } from "@/features/dashboard/hooks";
+import { WorkQueueTiles } from "./work-queue-tiles";
+
+function greeting(hour: number) {
+  if (hour < 12) return "Good morning";
+  if (hour < 18) return "Good afternoon";
+  return "Good evening";
+}
 
 export function DashboardView() {
   const { applications, jobPosts, loading, error, refetch } = useDashboard();
+  const user = useCurrentUser();
+  const isAdmin = user?.role === "admin";
+
+  if (error) {
+    return (
+      <ErrorState message="Couldn't load the dashboard." onRetry={refetch} />
+    );
+  }
+
+  const counts =
+    applications || jobPosts
+      ? {
+          applied: applications?.by_status.applied ?? 0,
+          prescreening: applications?.by_status.prescreening ?? 0,
+          interview: applications?.by_status.interview ?? 0,
+          draft: jobPosts?.by_status.draft ?? 0,
+        }
+      : null;
 
   return (
-    <div>
-      <PageHeader title="Dashboard" description="Overview of hiring activity." />
-
-      {error ? (
-        <ErrorState message="Couldn't load the dashboard." onRetry={refetch} />
-      ) : (
-        <div className="space-y-8">
-          <section className="space-y-3">
-            <h2 className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-              Applications
-            </h2>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              <StatCard
-                label="Total"
-                value={applications?.total ?? 0}
-                icon={ClipboardList}
-                href="/ats/applications"
-                isLoading={loading}
-              />
-              {(["applied", "prescreening", "interview", "success"] as const).map(
-                (s) => (
-                  <StatCard
-                    key={s}
-                    label={APPLICATION_STATUS[s].label}
-                    value={applications?.by_status[s] ?? 0}
-                    href={`/ats/applications?f_status=${s}`}
-                    isLoading={loading}
-                  />
-                ),
-              )}
-            </div>
-          </section>
-
-          <section className="space-y-3">
-            <h2 className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-              Job posts
-            </h2>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              <StatCard
-                label="Total"
-                value={jobPosts?.total ?? 0}
-                icon={Briefcase}
-                href="/ats/job-posts"
-                isLoading={loading}
-              />
-              {(["draft", "published", "closed"] as const).map((s) => (
-                <StatCard
-                  key={s}
-                  label={JOB_POST_STATUS[s].label}
-                  value={jobPosts?.by_status[s] ?? 0}
-                  href={`/ats/job-posts?f_status=${s}`}
-                  isLoading={loading}
-                />
-              ))}
-            </div>
-          </section>
+    <div className="space-y-5">
+      <header className="flex flex-wrap items-end justify-between gap-3">
+        <div className="space-y-1">
+          <h1
+            className="text-2xl font-semibold tracking-tight"
+            suppressHydrationWarning
+          >
+            {greeting(new Date().getHours())}
+            {user?.first_name ? `, ${user.first_name}` : ""}
+          </h1>
+          <p className="text-muted-foreground text-sm">
+            What needs your attention right now.
+          </p>
         </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => refetch()}
+            disabled={loading}
+          >
+            <RefreshCw className={loading ? "animate-spin" : undefined} />
+            Refresh
+          </Button>
+          <Button asChild size="sm">
+            <Link href="/ats/job-posts/new">
+              <Plus /> New job post
+            </Link>
+          </Button>
+        </div>
+      </header>
+
+      {isAdmin ? (
+        <AnalyticsPanel />
+      ) : (
+        <WorkQueueTiles counts={counts} loading={loading} />
       )}
     </div>
   );

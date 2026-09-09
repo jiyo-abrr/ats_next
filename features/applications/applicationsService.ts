@@ -4,9 +4,11 @@ import type {
   ApplicantRollup,
   Application,
   ApplicationAssessments,
+  ApplicationEvaluation,
   ApplicationScorecard,
   AttemptReview,
   JobAssessmentReviewRow,
+  JobEvaluationRow,
   ApplicationReview,
   ApplicationSummary,
   StatusStats,
@@ -58,6 +60,24 @@ export const getJobAssessmentReview = (qs: string) =>
   apiClient<Paginated<JobAssessmentReviewRow>>(
     `applications/assessment-review?${qs}`,
   );
+
+export const getJobEvaluations = (qs: string) =>
+  apiClient<Paginated<JobEvaluationRow>>(`applications/evaluations?${qs}`);
+
+export const exportEvaluationPack = (jobPostId: string) =>
+  apiBlob(`applications/export?job_post_id=${jobPostId}`);
+
+export const exportEvaluationsCsv = (jobPostId: string) =>
+  apiBlob(`applications/evaluations/export?job_post_id=${jobPostId}`);
+
+export const importEvaluations = (payload: unknown) =>
+  apiClient<{ imported: number; skipped: string[] }>(
+    "applications/evaluations/import",
+    { method: "POST", body: JSON.stringify(payload) },
+  );
+
+export const getApplicationEvaluation = (id: string) =>
+  apiClient<ApplicationEvaluation>(`applications/${id}/evaluation`);
 
 export const updateStatus = (id: string, status: string) =>
   apiClient<Application>(`applications/${id}/status`, {

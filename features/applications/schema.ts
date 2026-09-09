@@ -110,6 +110,35 @@ export interface ApplicationScorecard {
   applicant_last_name: string;
   applicant_email: string;
   assessments: AttemptSummary[];
+  evaluation: { recommendation: string | null; fit_score: number | null } | null;
+}
+
+export interface EvaluationScore {
+  category: "resume" | "assessment";
+  dimension: string;
+  rating: "strong" | "qualified" | "below_bar" | "na";
+  reason: string | null;
+}
+
+export interface ApplicationEvaluation {
+  id: string;
+  application_id: string;
+  recommendation: "advance" | "hold" | "reject" | null;
+  fit_score: number | null;
+  seniority_assessed: string | null;
+  summary: string | null;
+  model: string | null;
+  rubric_version: string | null;
+  created_at: string;
+  scores: EvaluationScore[];
+}
+
+export interface JobEvaluationRow {
+  application_id: string;
+  applicant_first_name: string;
+  applicant_last_name: string;
+  applicant_email: string;
+  evaluation: ApplicationEvaluation | null;
 }
 
 export interface JobAssessmentReviewRow {

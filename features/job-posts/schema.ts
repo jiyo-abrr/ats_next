@@ -44,12 +44,22 @@ const windowDays = z
 
 /** Details form — shared by create and edit; relationships (tags / exclusions /
  * templates) are managed on the detail-view tabs via dedicated endpoints. */
+/** TipTap serialises empty as "<p></p>"; validate on the visible text. */
+const richText = (max = 10000) =>
+  z
+    .string()
+    .max(max, `Too long (max ${max})`)
+    .refine(
+      (v) => v.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim().length > 0,
+      "Required",
+    );
+
 export const jobPostSchema = z
   .object({
     job_title: z.string().trim().min(1, "Required").max(200),
-    description: z.string().trim().min(1, "Required").max(10000),
-    requirements: z.string().trim().min(1, "Required").max(10000),
-    qualifications: z.string().trim().min(1, "Required").max(10000),
+    description: richText(),
+    requirements: richText(),
+    qualifications: richText(),
     salary_min: money,
     salary_max: money,
     currency: z.enum([

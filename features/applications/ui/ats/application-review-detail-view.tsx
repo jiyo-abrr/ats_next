@@ -20,6 +20,7 @@ import { StatusActions } from "./_parts/status-actions";
 import { ExtendDeadlineDialog } from "./_parts/extend-deadline-dialog";
 import { ResumeDownloadButton } from "./_parts/resume-download-button";
 import { ReviewAssessments } from "./_parts/review-assessments";
+import { EvaluationCard } from "./_parts/evaluation-card";
 
 const DEADLINE_PHASE = new Set(["applied", "disqualified"]);
 
@@ -137,6 +138,8 @@ export function ApplicationReviewDetailView({ id }: { id: string }) {
           <ExtendDeadlineDialog id={id} onDone={refetchAssessments} />
         </div>
       )}
+
+      <EvaluationCard applicationId={id} />
 
       <ReviewAssessments applicationId={id} />
     </div>

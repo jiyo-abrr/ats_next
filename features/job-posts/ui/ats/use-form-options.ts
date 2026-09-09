@@ -10,7 +10,7 @@ import type { Tag } from "@/features/tags/schema";
 import { useTemplates } from "@/features/templates/hooks";
 import type { TemplateKind } from "@/features/templates/schema";
 
-const PAGE = "size=200&sort=title:asc";
+const PAGE = "size=100&sort=title:asc";
 
 /**
  * One-shot loads for the job-post Details form's FK pickers — fetched via the
@@ -30,7 +30,7 @@ export function useJobPostFormOptions() {
       )
       .catch(() => undefined);
     companyAddressesService
-      .getAll("size=200&sort=label:asc")
+      .getAll("size=100&sort=label:asc")
       .then((r) =>
         setAddresses(
           r.items.map((a) => ({
@@ -42,7 +42,7 @@ export function useJobPostFormOptions() {
       )
       .catch(() => undefined);
     tagsService
-      .getAll("size=200&sort=name:asc")
+      .getAll("size=100&sort=name:asc")
       .then((r) => setTags(r.items))
       .catch(() => undefined);
   }, []);

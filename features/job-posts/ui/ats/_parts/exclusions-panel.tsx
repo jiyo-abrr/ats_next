@@ -23,7 +23,7 @@ export function ExclusionsPanel({ job }: { job: JobPost }) {
 
   useEffect(() => {
     jobPostsService
-      .getAll("size=200&sort=job_title:asc")
+      .getAll("size=100&sort=job_title:asc")
       .then((r) => setOthers(r.items.filter((j) => j.id !== job.id)))
       .catch(() => undefined);
   }, [job.id]);

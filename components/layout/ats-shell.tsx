@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import {
   Briefcase,
   Building2,
+  ChartNoAxesCombined,
   ChevronDown,
   ClipboardList,
   LayoutDashboard,
@@ -18,6 +19,7 @@ import {
   Users,
 } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { UserMenu } from "@/components/user-menu";
@@ -228,6 +230,13 @@ export function AtsShell({
             <Logo href="/ats" />
           </div>
           <div className="ml-auto flex items-center gap-2">
+            {role === "admin" ? (
+              <Button asChild variant="ghost" size="sm">
+                <Link href="/ats?view=overview#analytics">
+                  <ChartNoAxesCombined /> Analytics
+                </Link>
+              </Button>
+            ) : null}
             <ThemeToggle />
             <UserMenu homeHref="/ats" />
           </div>

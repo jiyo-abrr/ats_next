@@ -5,9 +5,9 @@ import type { UseFormReturn } from "react-hook-form";
 import { FieldGroup } from "@/components/ui/field";
 import {
   ComboField,
+  RichTextField,
   SelectField,
   TextField,
-  TextareaField,
 } from "@/components/form/fields";
 import type { ComboOption } from "@/components/form/async-combobox";
 import {
@@ -120,25 +120,25 @@ export function JobPostForm({
           type="number"
         />
       </div>
-      <TextareaField
+      <RichTextField
         control={form.control}
         name="description"
         label="About the role"
-        rows={5}
+        placeholder="What the role is, the team, day-to-day…"
         required
       />
-      <TextareaField
+      <RichTextField
         control={form.control}
         name="requirements"
         label="Requirements"
-        rows={4}
+        placeholder="Must-have skills and experience"
         required
       />
-      <TextareaField
+      <RichTextField
         control={form.control}
         name="qualifications"
         label="Qualifications"
-        rows={4}
+        placeholder="Education, certifications, nice-to-haves"
         required
       />
     </FieldGroup>
