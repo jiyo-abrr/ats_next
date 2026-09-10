@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { useAppDispatch, useAppSelector } from "@/lib/hooks/redux";
 import { useTableQuery } from "@/lib/hooks/use-table-query";
@@ -12,6 +12,8 @@ import {
   fetchApplicationsForReview,
   fetchMyApplications,
 } from "@/lib/store/applicationsSlice";
+import { getInterview } from "@/features/applications/applicationsService";
+import type { InterviewRequest } from "@/features/applications/schema";
 
 export function useMyApplications() {
   const dispatch = useAppDispatch();
@@ -137,6 +139,43 @@ export function useJobApplicants(jobPostId: string) {
     loading: reviewLoading,
     error: reviewError,
     refetch,
+  };
+}
+
+/** The interview request + slots for one application (null until HR schedules
+ * one). Used by both the HR scheduler card and the applicant's slot picker. */
+export function useInterview(applicationId: string) {
+  const [interview, setInterview] = useState<InterviewRequest | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
+
+  useEffect(() => {
+    if (!applicationId) return;
+    let active = true;
+    void getInterview(applicationId)
+      .then((data) => {
+        if (!active) return;
+        setInterview(data);
+        setError(false);
+      })
+      .catch(() => {
+        if (active) setError(true);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [applicationId, reloadKey]);
+
+  return {
+    interview,
+    loading,
+    error,
+    setInterview,
+    refetch: () => setReloadKey((k) => k + 1),
   };
 }
 

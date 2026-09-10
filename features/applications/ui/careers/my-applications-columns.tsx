@@ -19,7 +19,14 @@ export const myApplicationsColumns: ColumnDef<ApplicationSummary, unknown>[] = [
     meta: { className: "w-40" },
     cell: ({ row }) => {
       const meta = APPLICATION_STATUS[row.original.status];
-      return <StatusBadge label={meta.label} tone={meta.tone} />;
+      return (
+        <span className="flex flex-wrap items-center gap-1.5">
+          <StatusBadge label={meta.label} tone={meta.tone} />
+          {row.original.needs_interview_pick ? (
+            <StatusBadge label="Pick a time" tone="warning" />
+          ) : null}
+        </span>
+      );
     },
   },
   {

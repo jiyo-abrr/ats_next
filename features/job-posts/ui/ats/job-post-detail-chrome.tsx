@@ -85,6 +85,7 @@ export function JobPostDetailChrome({
           { href: base, label: "Applicants" },
           { href: `${base}/pipeline`, label: "Pipeline" },
           { href: `${base}/compare`, label: "Compare" },
+          { href: `${base}/scheduling`, label: "Scheduling" },
         ]}
       />
 

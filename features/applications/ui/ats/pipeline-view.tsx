@@ -17,6 +17,8 @@ import { toast } from "@/lib/utils/toast";
 import { useAppDispatch } from "@/lib/hooks/redux";
 import { changeApplicationStatus } from "@/lib/store/applicationsSlice";
 import * as applicationsService from "@/features/applications/applicationsService";
+import { getInterviewStatuses } from "@/features/interviews/interviewsService";
+import type { InterviewStatus } from "@/features/interviews/schema";
 import {
   PIPELINE_STAGES,
   useJobPipelineStage,
@@ -68,6 +70,25 @@ export function PipelineView({ jobId }: { jobId: string }) {
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [acting, setActing] = useState<string | null>(null);
   const [bulkBusy, setBulkBusy] = useState(false);
+  const [interviewStatus, setInterviewStatus] = useState<
+    Record<string, InterviewStatus>
+  >({});
+
+  useEffect(() => {
+    if (stage !== "interview") return;
+    let active = true;
+    void getInterviewStatuses(jobId)
+      .then((rows) => {
+        if (active)
+          setInterviewStatus(
+            Object.fromEntries(rows.map((r) => [r.application_id, r])),
+          );
+      })
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, [stage, jobId, data]);
 
   // Selection is scoped to the current stage + page; a stale-keyed selection
   // reads as empty (no effect needed to clear it on navigation).
@@ -199,6 +220,31 @@ export function PipelineView({ jobId }: { jobId: string }) {
         </span>
       ),
     },
+    ...(stage === "interview"
+      ? [
+          {
+            id: "interview",
+            header: "Interview",
+            meta: { className: "w-40" },
+            cell: ({ row }) => {
+              const s = interviewStatus[row.original.id];
+              if (!s)
+                return (
+                  <span className="text-muted-foreground text-xs">
+                    Not scheduled
+                  </span>
+                );
+              if (s.state === "confirmed")
+                return (
+                  <span className="text-xs tabular-nums">
+                    {s.starts_at ? formatDate(s.starts_at) : "Confirmed"}
+                  </span>
+                );
+              return <StatusBadge label="Awaiting candidate" tone="warning" />;
+            },
+          } as ColumnDef<ApplicationReview, unknown>,
+        ]
+      : []),
     {
       id: "actions",
       header: "",

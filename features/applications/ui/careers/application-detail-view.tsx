@@ -12,6 +12,8 @@ import { Countdown } from "@/components/countdown";
 import { ErrorState } from "@/components/states";
 import { StatusBadge } from "@/components/status-badge";
 import { AssessmentPanel } from "@/features/assessments/ui/careers/assessment-panel";
+import { InterviewPicker } from "./interview-picker";
+import { InterviewSummary } from "../interview-summary";
 import { useJobPost } from "@/features/job-posts/hooks";
 import { APPLICATION_STATUS } from "@/lib/constants";
 import { formatDate, formatDateTime } from "@/lib/utils/format";
@@ -125,6 +127,12 @@ export function ApplicationDetailView({ id }: { id: string }) {
 
       <AssessmentPanel applicationId={id} />
 
+      {app.status === "interview" ? (
+        <InterviewPicker applicationId={id} />
+      ) : (
+        <InterviewSummary applicationId={id} />
+      )}
+
       <Card>
         <CardHeader>
           <CardTitle>What happens next</CardTitle>
@@ -134,7 +142,8 @@ export function ApplicationDetailView({ id }: { id: string }) {
             "Complete any required assessments above. Once submitted, your application moves to prescreening review."}
           {app.status === "prescreening" &&
             "Your application is being screened by the hiring team."}
-          {app.status === "interview" && "You're in the interview stage."}
+          {app.status === "interview" &&
+            "You're in the interview stage — pick a time above and the hiring team will meet with you."}
           {app.status === "success" && "You've been selected — congratulations!"}
           {(app.status === "denied" || app.status === "failed") &&
             "This application wasn't successful this time."}

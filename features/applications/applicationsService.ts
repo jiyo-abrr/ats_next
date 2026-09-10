@@ -6,6 +6,9 @@ import type {
   ApplicationAssessments,
   ApplicationEvaluation,
   ApplicationScorecard,
+  InterviewOpenSlot,
+  InterviewRequest,
+  InterviewRequestInput,
   AttemptReview,
   JobAssessmentReviewRow,
   JobEvaluationRow,
@@ -78,6 +81,40 @@ export const importEvaluations = (payload: unknown) =>
 
 export const getApplicationEvaluation = (id: string) =>
   apiClient<ApplicationEvaluation>(`applications/${id}/evaluation`);
+
+// ---- Interview scheduling ----
+export const getInterview = (applicationId: string) =>
+  apiClient<InterviewRequest | null>(`applications/${applicationId}/interview`);
+
+export const setInterview = (
+  applicationId: string,
+  payload: InterviewRequestInput,
+) =>
+  apiClient<InterviewRequest>(`applications/${applicationId}/interview`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+
+export const deleteInterview = (applicationId: string) =>
+  apiClient<void>(`applications/${applicationId}/interview`, {
+    method: "DELETE",
+  });
+
+export const getInterviewOpenSlots = (applicationId: string) =>
+  apiClient<InterviewOpenSlot[]>(
+    `applications/${applicationId}/interview/open-slots`,
+  );
+
+/** Confirm an interview time: an existing hand-picked slot (`slot_id`) or an
+ * open availability instant (`starts_at`). */
+export const selectInterviewSlot = (
+  applicationId: string,
+  pick: { slot_id: string } | { starts_at: string },
+) =>
+  apiClient<InterviewRequest>(
+    `applications/${applicationId}/interview/select`,
+    { method: "POST", body: JSON.stringify(pick) },
+  );
 
 export const updateStatus = (id: string, status: string) =>
   apiClient<Application>(`applications/${id}/status`, {

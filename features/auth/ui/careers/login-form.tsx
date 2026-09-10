@@ -12,7 +12,6 @@ import { login } from "@/lib/store/authSlice";
 import { type LoginInput, loginSchema } from "@/features/auth/schema";
 import { ATS_ROLES } from "@/lib/config";
 import { useAppDispatch } from "@/lib/hooks/redux";
-import { useAuthLoading } from "@/features/auth/hooks";
 import { toast } from "@/lib/utils/toast";
 
 export function LoginForm() {
@@ -20,12 +19,15 @@ export function LoginForm() {
   const router = useRouter();
   const params = useSearchParams();
   const next = params.get("next");
-  const loading = useAuthLoading();
 
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: "", password: "" },
   });
+  // Drive the button off this form's own submission state, not the app-wide
+  // `auth.loading` (which AuthBootstrap's fetchMe flips right after hydration —
+  // an SSR/client mismatch on this button).
+  const submitting = form.formState.isSubmitting;
 
   const onSubmit = form.handleSubmit(async (values) => {
     try {
@@ -59,8 +61,8 @@ export function LoginForm() {
           required
         />
       </FieldGroup>
-      <Button type="submit" className="w-full" disabled={loading}>
-        {loading ? "Signing in…" : "Sign in"}
+      <Button type="submit" className="w-full" disabled={submitting}>
+        {submitting ? "Signing in…" : "Sign in"}
       </Button>
       <p className="text-muted-foreground text-center text-sm">
         No account?{" "}

@@ -14,6 +14,7 @@ export interface ApplicationSummary {
   created_at: string;
   job_post_id: string;
   job_title: string;
+  needs_interview_pick: boolean;
 }
 
 export interface ApplicantRollup {
@@ -152,6 +153,45 @@ export interface JobAssessmentReviewRow {
 export interface StatusStats {
   by_status: Record<string, number>;
   total: number;
+}
+
+export type InterviewMode = "video" | "onsite" | "phone";
+
+export interface InterviewSlot {
+  id: string;
+  starts_at: string;
+  ends_at: string;
+  selected: boolean;
+}
+
+export interface InterviewRequest {
+  id: string;
+  application_id: string;
+  mode: InterviewMode;
+  location_or_link: string | null;
+  duration_minutes: number;
+  notes: string | null;
+  /** true: candidate self-books from availability; false: HR hand-picked slots. */
+  self_scheduled: boolean;
+  created_at: string;
+  slots: InterviewSlot[];
+  selected_slot_id: string | null;
+  selected_at: string | null;
+}
+
+export interface InterviewOpenSlot {
+  starts_at: string;
+  ends_at: string;
+}
+
+/** Payload for PUT /applications/{id}/interview.
+ * An empty `slots` array puts the interview in self-schedule mode. */
+export interface InterviewRequestInput {
+  mode: InterviewMode;
+  location_or_link?: string | null;
+  duration_minutes: number;
+  notes?: string | null;
+  slots: { starts_at: string }[];
 }
 
 export const extendDeadlineSchema = z

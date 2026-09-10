@@ -21,6 +21,8 @@ import { ExtendDeadlineDialog } from "./_parts/extend-deadline-dialog";
 import { ResumeDownloadButton } from "./_parts/resume-download-button";
 import { ReviewAssessments } from "./_parts/review-assessments";
 import { EvaluationCard } from "./_parts/evaluation-card";
+import { InterviewScheduler } from "./_parts/interview-scheduler";
+import { InterviewSummary } from "../interview-summary";
 
 const DEADLINE_PHASE = new Set(["applied", "disqualified"]);
 
@@ -137,6 +139,12 @@ export function ApplicationReviewDetailView({ id }: { id: string }) {
         <div className="flex justify-end">
           <ExtendDeadlineDialog id={id} onDone={refetchAssessments} />
         </div>
+      )}
+
+      {app.status === "interview" ? (
+        <InterviewScheduler applicationId={id} />
+      ) : (
+        <InterviewSummary applicationId={id} />
       )}
 
       <EvaluationCard applicationId={id} />

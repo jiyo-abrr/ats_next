@@ -18,13 +18,11 @@ import { TextField } from "@/components/form/fields";
 import { signup } from "@/lib/store/authSlice";
 import { type SignupInput, signupSchema } from "@/features/auth/schema";
 import { useAppDispatch } from "@/lib/hooks/redux";
-import { useAuthLoading } from "@/features/auth/hooks";
 import { toast } from "@/lib/utils/toast";
 
 export function SignupForm() {
   const dispatch = useAppDispatch();
   const router = useRouter();
-  const loading = useAuthLoading();
 
   const form = useForm<SignupInput>({
     resolver: zodResolver(signupSchema),
@@ -38,6 +36,10 @@ export function SignupForm() {
       resume: undefined,
     },
   });
+
+  // This form's own submission state — not the app-wide `auth.loading`, which
+  // AuthBootstrap's fetchMe flips right after hydration (SSR/client mismatch).
+  const submitting = form.formState.isSubmitting;
 
   const onSubmit = form.handleSubmit(async (values) => {
     const fd = new FormData();
@@ -136,8 +138,8 @@ export function SignupForm() {
         />
       </FieldGroup>
 
-      <Button type="submit" className="w-full" disabled={loading}>
-        {loading ? "Creating account…" : "Create account"}
+      <Button type="submit" className="w-full" disabled={submitting}>
+        {submitting ? "Creating account…" : "Create account"}
       </Button>
       <p className="text-muted-foreground text-center text-sm">
         Already have an account?{" "}

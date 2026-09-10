@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import {
   Briefcase,
   Building2,
+  CalendarClock,
   ChartNoAxesCombined,
   ChevronDown,
   ClipboardList,
@@ -39,6 +40,7 @@ const nav: NavItem[] = [
   { href: "/ats/job-posts", label: "Job posts", icon: Briefcase },
   { href: "/ats/applications", label: "Applications", icon: ClipboardList },
   { href: "/ats/applicants", label: "Applicants", icon: UserSearch },
+  { href: "/ats/calendar", label: "Interview calendar", icon: CalendarClock },
   { href: "/ats/positions", label: "Positions", icon: Users },
   { href: "/ats/tags", label: "Tags", icon: Tags },
   { href: "/ats/company-addresses", label: "Locations", icon: Building2 },
