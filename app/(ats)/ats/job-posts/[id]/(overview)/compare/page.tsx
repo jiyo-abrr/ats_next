@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 
-import { CompareView } from "@/features/applications/ui/ats/compare-view";
+import { CompareView } from "@/components/applications/ats/compare/compare-view";
 import { DetailSkeleton } from "@/components/page-skeleton";
 
 export const metadata: Metadata = { title: "Compare applicants" };

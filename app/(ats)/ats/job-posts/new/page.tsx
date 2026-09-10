@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 
-import { JobPostCreateView } from "@/features/job-posts/ui/ats/job-post-create-view";
+import { JobPostCreateView } from "@/components/job-posts/ats/create/job-post-create-view";
 import { FormSkeleton } from "@/components/page-skeleton";
 
 export const metadata: Metadata = { title: "New job post" };

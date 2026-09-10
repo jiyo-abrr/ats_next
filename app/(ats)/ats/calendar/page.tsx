@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { ScheduleView } from "@/features/interviews/ui/ats/schedule-view";
+import { ScheduleView } from "@/components/interviews/ats/schedule/schedule-view";
 
 export const metadata: Metadata = { title: "Interview schedule" };
 

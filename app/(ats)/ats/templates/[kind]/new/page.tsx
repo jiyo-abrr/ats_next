@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { TemplateCreateView } from "@/features/templates/ui/ats/template-create-view";
+import { TemplateCreateView } from "@/components/templates/ats/create/template-create-view";
 import {
   TEMPLATE_KINDS,
   TEMPLATE_KIND_LABELS,

@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
-import { EditUserView } from "@/features/rbac/ui/ats/edit-user-view";
+import { EditUserView } from "@/components/rbac/ats/edit-user/edit-user-view";
 import { FormSkeleton } from "@/components/page-skeleton";
 import { getServerUser } from "@/lib/server/api";
 

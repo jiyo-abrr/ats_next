@@ -23,7 +23,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { UserMenu } from "@/components/user-menu";
+import { UserMenu } from "@/components/auth/shared/user-menu";
 import type { Role } from "@/lib/types";
 import { cn } from "@/lib/cn";
 

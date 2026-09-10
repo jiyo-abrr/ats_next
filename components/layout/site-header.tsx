@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Logo } from "@/components/logo";
-import { UserMenu } from "@/components/user-menu";
+import { UserMenu } from "@/components/auth/shared/user-menu";
 import {
   useAuthResolved,
   useCurrentUser,

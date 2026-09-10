@@ -1,5 +1,10 @@
 # ATS Frontend — Implementation Plan
 
+> **Current component layout:** presentation now lives in
+> `components/<domain>/<surface>/<page>/`. See [component organization](../components/README.md)
+> for current paths. The `features/.../ui` paths below record the earlier implementation;
+> domain services, schemas, hooks, and Redux remain in their existing locations.
+
 > **Phases 0 → 5 complete & verified.** Phase 5 (clean-architecture restructure — `ui/` mirrors
 > `app/`, real Suspense fallbacks) landed as a pure move/import pass, no behaviour change.
 > See **Status** at the bottom.

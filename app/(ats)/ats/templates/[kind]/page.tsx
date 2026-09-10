@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { TemplateKindView } from "@/features/templates/ui/ats/template-kind-view";
+import { TemplateKindView } from "@/components/templates/ats/list/template-kind-view";
 import {
   TEMPLATE_KINDS,
   TEMPLATE_KIND_LABELS,

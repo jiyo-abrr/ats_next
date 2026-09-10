@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 
-import { JobDetailView } from "@/features/job-posts/ui/careers/job-detail-view";
+import { JobDetailView } from "@/components/job-posts/careers/detail/job-detail-view";
 import { DetailSkeleton } from "@/components/page-skeleton";
 
 export default async function JobDetailPage({

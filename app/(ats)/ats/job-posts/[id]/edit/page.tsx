@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 
-import { JobPostEditView } from "@/features/job-posts/ui/ats/job-post-edit-view";
+import { JobPostEditView } from "@/components/job-posts/ats/edit/job-post-edit-view";
 import { FormSkeleton } from "@/components/page-skeleton";
 
 export const metadata: Metadata = { title: "Edit job post" };

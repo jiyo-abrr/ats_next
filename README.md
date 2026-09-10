@@ -36,11 +36,14 @@ npm run dev
 - **Structure** —
   - `lib/` — `api/`, `hooks/`, `utils/`, `store/`, `middleware/`, `auth/` (server), `server/`,
     plus `config` / `types` / `constants` / `cn` / `providers`.
-  - `components/` — cross-feature only: `ui/` (shadcn), `data-table/`, `form/`, `layout/`, flat rest.
+  - `components/` — page UI under `<domain>/<surface>/<page>/`, with smaller components
+    and named feature directories beside each page view. Shared UI remains in `ui/` (shadcn),
+    `data-table/`, `form/`, and `layout/`. See [component organization](components/README.md).
   - `features/<domain>/` — one folder per backend domain: `<domain>Service.ts`, `schema.ts`
-    (zod + response types) and `hooks.ts` at the root; presentation under `ui/{careers,ats}/`
-    (mirroring the route surfaces) with `_parts/` for a view's private sub-components.
-  - `app/**/page.tsx` — routing only; each renders a `features/**` view inside `<Suspense>`.
+    (zod + response types) and `hooks.ts` at the root. Domain data and state integration stay here;
+    presentation lives in `components/`.
+  - `app/**/page.tsx` — route params, metadata, access guards, and page composition; renders
+    a `components/**` view, using `<Suspense>` where needed.
     Job-post routes: `/ats/job-posts/[id]` lists that post's applicants; `…/[id]/edit` is the
     Details / Tags / Exclusions / Assessments editor. Assessment templates are one route per
     kind (`/ats/templates/<pre-assessment|culture-fit|technical-assessment>`), reached from the

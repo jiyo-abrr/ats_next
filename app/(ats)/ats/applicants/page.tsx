@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 
-import { ApplicantsView } from "@/features/applications/ui/ats/applicants-view";
+import { ApplicantsView } from "@/components/applications/ats/applicants/applicants-view";
 import { TableSkeleton } from "@/components/data-table/table-skeleton";
 
 export const metadata: Metadata = { title: "Applicants" };

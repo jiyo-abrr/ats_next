@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 
-import { ProfileView } from "@/features/profile/ui/careers/profile-view";
+import { ProfileView } from "@/components/profile/careers/detail/profile-view";
 import { DetailSkeleton } from "@/components/page-skeleton";
 
 export const metadata: Metadata = { title: "Profile" };

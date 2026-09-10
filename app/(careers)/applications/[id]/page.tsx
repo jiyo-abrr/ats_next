@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 
-import { ApplicationDetailView } from "@/features/applications/ui/careers/application-detail-view";
+import { ApplicationDetailView } from "@/components/applications/careers/detail/application-detail-view";
 import { DetailSkeleton } from "@/components/page-skeleton";
 
 export default async function ApplicationDetailPage({

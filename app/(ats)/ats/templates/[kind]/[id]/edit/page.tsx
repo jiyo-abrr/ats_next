@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { TemplateEditView } from "@/features/templates/ui/ats/template-edit-view";
+import { TemplateEditView } from "@/components/templates/ats/edit/template-edit-view";
 import {
   TEMPLATE_KINDS,
   TEMPLATE_KIND_LABELS,

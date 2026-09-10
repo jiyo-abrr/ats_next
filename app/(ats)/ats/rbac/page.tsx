@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
-import { RbacView } from "@/features/rbac/ui/ats/rbac-view";
+import { RbacView } from "@/components/rbac/ats/permissions/rbac-view";
 import { DetailSkeleton } from "@/components/page-skeleton";
 import { getServerUser } from "@/lib/server/api";
 

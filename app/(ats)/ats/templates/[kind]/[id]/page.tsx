@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 
-import { TemplateView } from "@/features/templates/ui/ats/template-view";
+import { TemplateView } from "@/components/templates/ats/detail/template-view";
 import { TEMPLATE_KINDS, type TemplateKind } from "@/features/templates/schema";
 import { DetailSkeleton } from "@/components/page-skeleton";
 

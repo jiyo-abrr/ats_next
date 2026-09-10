@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
-import { CreateUserView } from "@/features/rbac/ui/ats/create-user-view";
+import { CreateUserView } from "@/components/rbac/ats/create-user/create-user-view";
 import { FormSkeleton } from "@/components/page-skeleton";
 import { getServerUser } from "@/lib/server/api";
 

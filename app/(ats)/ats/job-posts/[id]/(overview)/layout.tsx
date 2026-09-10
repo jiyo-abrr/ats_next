@@ -1,4 +1,4 @@
-import { JobPostDetailChrome } from "@/features/job-posts/ui/ats/job-post-detail-chrome";
+import { JobPostDetailChrome } from "@/components/job-posts/ats/shared/job-post-detail-chrome";
 
 export default async function JobPostOverviewLayout({
   children,

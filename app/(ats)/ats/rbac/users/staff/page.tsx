@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
-import { StaffUsersView } from "@/features/rbac/ui/ats/staff-users-view";
+import { StaffUsersView } from "@/components/rbac/ats/staff/staff-users-view";
 import { DetailSkeleton } from "@/components/page-skeleton";
 import { getServerUser } from "@/lib/server/api";
 

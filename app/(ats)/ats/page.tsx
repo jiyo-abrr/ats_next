@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 
-import { DashboardView } from "@/features/dashboard/ui/ats/dashboard-view";
+import { DashboardView } from "@/components/dashboard/ats/overview/dashboard-view";
 import { DetailSkeleton } from "@/components/page-skeleton";
 
 export const metadata: Metadata = { title: "Dashboard" };

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { JobPostSchedulingView } from "@/features/interviews/ui/ats/job-post-scheduling-view";
+import { JobPostSchedulingView } from "@/components/interviews/ats/job-post-scheduling/job-post-scheduling-view";
 
 export const metadata: Metadata = { title: "Interview scheduling" };
 

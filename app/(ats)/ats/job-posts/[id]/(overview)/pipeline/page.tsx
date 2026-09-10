@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 
-import { PipelineView } from "@/features/applications/ui/ats/pipeline-view";
+import { PipelineView } from "@/components/applications/ats/pipeline/pipeline-view";
 import { DetailSkeleton } from "@/components/page-skeleton";
 
 export const metadata: Metadata = { title: "Hiring pipeline" };

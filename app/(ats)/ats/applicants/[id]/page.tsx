@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 
-import { ApplicantDetailView } from "@/features/applications/ui/ats/applicant-detail-view";
+import { ApplicantDetailView } from "@/components/applications/ats/applicant-detail/applicant-detail-view";
 import { DetailSkeleton } from "@/components/page-skeleton";
 
 export default async function AtsApplicantDetailPage({
