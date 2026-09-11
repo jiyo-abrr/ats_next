@@ -19,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { AddressMap } from "@/components/address-map";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { formatDateTime } from "@/lib/utils/format";
 import { toast } from "@/lib/utils/toast";
@@ -31,6 +32,7 @@ import type {
   InterviewMode,
   InterviewRequest,
 } from "@/features/applications/schema";
+import { useJobPostAvailability } from "@/features/interviews/hooks";
 
 const MODE_OPTIONS: { value: InterviewMode; label: string; hint: string }[] = [
   { value: "video", label: "Video call", hint: "Meeting link" },
@@ -48,7 +50,13 @@ function toIso(day: Date, time: string): string | null {
   return d.toISOString();
 }
 
-export function InterviewScheduler({ applicationId }: { applicationId: string }) {
+export function InterviewScheduler({
+  applicationId,
+  jobPostId,
+}: {
+  applicationId: string;
+  jobPostId: string;
+}) {
   const { interview, loading, error, setInterview: setLocal } =
     useInterview(applicationId);
 
@@ -59,6 +67,7 @@ export function InterviewScheduler({ applicationId }: { applicationId: string })
     <SchedulerForm
       key={interview?.id ?? "new"}
       applicationId={applicationId}
+      jobPostId={jobPostId}
       initial={interview}
       onSaved={setLocal}
     />
@@ -67,10 +76,12 @@ export function InterviewScheduler({ applicationId }: { applicationId: string })
 
 function SchedulerForm({
   applicationId,
+  jobPostId,
   initial,
   onSaved,
 }: {
   applicationId: string;
+  jobPostId: string;
   initial: InterviewRequest | null;
   onSaved: (next: InterviewRequest | null) => void;
 }) {
@@ -79,6 +90,9 @@ function SchedulerForm({
     initial && !initial.self_scheduled ? "manual" : "calendar",
   );
   const [details, setDetails] = useState(initial?.location_or_link ?? "");
+  const [companyAddressId, setCompanyAddressId] = useState<string | null>(
+    initial?.company_address_id ?? null,
+  );
   const [notes, setNotes] = useState(initial?.notes ?? "");
   const [duration, setDuration] = useState(initial?.duration_minutes ?? 45);
   const [times, setTimes] = useState<string[]>(
@@ -87,12 +101,25 @@ function SchedulerForm({
   const [day, setDay] = useState<Date | undefined>(undefined);
   const [time, setTime] = useState("09:00");
   const [saving, setSaving] = useState(false);
+  const { data: availability } = useJobPostAvailability(jobPostId);
 
   const selectedIso = useMemo(
     () => initial?.slots.find((s) => s.selected)?.starts_at ?? null,
     [initial],
   );
   const modeHint = MODE_OPTIONS.find((m) => m.value === mode)?.hint ?? "";
+  const modePresets = useMemo(
+    () =>
+      mode === "phone"
+        ? []
+        : (availability?.logistics_presets.filter((p) => p.mode === mode) ?? []),
+    [availability, mode],
+  );
+  const linkedAddress =
+    mode === "onsite" && companyAddressId
+      ? (modePresets.find((p) => p.company_address_id === companyAddressId)?.address ??
+        (companyAddressId === initial?.company_address_id ? initial?.address : null))
+      : null;
 
   const addTime = () => {
     if (!day) {
@@ -123,6 +150,7 @@ function SchedulerForm({
       const next = await setInterview(applicationId, {
         mode,
         location_or_link: details.trim() || null,
+        company_address_id: mode === "onsite" ? companyAddressId : null,
         duration_minutes: duration,
         notes: notes.trim() || null,
         slots:
@@ -190,7 +218,10 @@ function SchedulerForm({
             <Label>Mode</Label>
             <Select
               value={mode}
-              onValueChange={(v) => setMode(v as InterviewMode)}
+              onValueChange={(v) => {
+                setMode(v as InterviewMode);
+                setCompanyAddressId(null);
+              }}
             >
               <SelectTrigger>
                 <SelectValue />
@@ -206,17 +237,52 @@ function SchedulerForm({
           </div>
           <div className="space-y-1.5 sm:col-span-2">
             <Label>{modeHint}</Label>
-            <Input
-              value={details}
-              onChange={(e) => setDetails(e.target.value)}
-              placeholder={
-                mode === "video"
-                  ? "https://meet.example.com/…"
-                  : mode === "onsite"
-                    ? "5F, Tower One, BGC, Taguig"
-                    : "+63 …"
-              }
-            />
+            <div className="flex gap-2">
+              <Input
+                value={details}
+                onChange={(e) => {
+                  setDetails(e.target.value);
+                  setCompanyAddressId(null);
+                }}
+                placeholder={
+                  mode === "video"
+                    ? "https://meet.example.com/…"
+                    : mode === "onsite"
+                      ? "5F, Tower One, BGC, Taguig"
+                      : "+63 …"
+                }
+              />
+              {modePresets.length > 0 ? (
+                <Select
+                  value=""
+                  onValueChange={(v) => {
+                    const preset = modePresets.find((p) => p.id === v);
+                    if (!preset) return;
+                    setDetails(preset.value);
+                    setCompanyAddressId(preset.company_address_id);
+                  }}
+                >
+                  <SelectTrigger className="w-40 shrink-0" size="default">
+                    <SelectValue placeholder="Use a preset" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {modePresets.map((p) => (
+                      <SelectItem key={p.id} value={p.id}>
+                        {p.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : null}
+            </div>
+            {linkedAddress ? (
+              <AddressMap
+                latitude={linkedAddress.latitude}
+                longitude={linkedAddress.longitude}
+                label={linkedAddress.label}
+                className="h-32 w-full rounded-md border"
+              />
+            ) : null}
           </div>
           <div className="space-y-1.5">
             <Label>Duration</Label>

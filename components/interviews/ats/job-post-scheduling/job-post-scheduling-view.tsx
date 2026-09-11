@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { CalendarClock, Users } from "lucide-react";
+import { CalendarClock, Link2, Users } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,8 +21,10 @@ import type {
   AvailabilityWindow,
   Interviewer,
   JobPostAvailability,
+  LogisticsPresetInput,
 } from "@/features/interviews/schema";
 import { AvailabilityEditor } from "../shared/availability-editor";
+import { LogisticsPresetsEditor } from "../shared/logistics-presets-editor";
 import { WeekPreview } from "./week-preview";
 
 export function JobPostSchedulingView({ jobId }: { jobId: string }) {
@@ -37,7 +39,7 @@ export function JobPostSchedulingView({ jobId }: { jobId: string }) {
 
   return (
     <SchedulingForm
-      key={`${data.uses_custom_windows}-${data.interviewers.length}`}
+      key={`${data.uses_custom_windows}-${data.uses_custom_logistics}-${data.interviewers.length}`}
       jobId={jobId}
       initial={data}
     />
@@ -55,6 +57,17 @@ function SchedulingForm({
     initial.uses_custom_windows ? "custom" : "global",
   );
   const [windows, setWindows] = useState<AvailabilityWindow[]>(initial.windows);
+  const [logisticsMode, setLogisticsMode] = useState<"global" | "custom">(
+    initial.uses_custom_logistics ? "custom" : "global",
+  );
+  const [presets, setPresets] = useState<LogisticsPresetInput[]>(
+    initial.logistics_presets.map((p) => ({
+      mode: p.mode,
+      label: p.label,
+      value: p.value,
+      company_address_id: p.company_address_id,
+    })),
+  );
   const [interviewerIds, setInterviewerIds] = useState<string[]>(
     initial.interviewers.map((i) => i.id),
   );
@@ -87,11 +100,21 @@ function SchedulingForm({
         }
       }
     }
+    const payloadPresets = logisticsMode === "custom" ? presets : [];
+    if (logisticsMode === "custom") {
+      for (const p of payloadPresets) {
+        if (!p.label.trim() || (!p.company_address_id && !p.value.trim())) {
+          toast.error("Every preset needs a name and a value or a linked address");
+          return;
+        }
+      }
+    }
     setSaving(true);
     try {
       await setJobPostAvailability(jobId, {
         windows: payloadWindows,
         interviewer_ids: interviewerIds,
+        logistics_presets: payloadPresets,
       });
       toast.success("Scheduling saved");
     } catch {
@@ -149,6 +172,41 @@ function SchedulingForm({
           ) : (
             <p className="text-muted-foreground rounded-md border border-dashed p-3 text-sm">
               Candidates will see the global weekly windows.
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Link2 className="size-4" /> Logistics presets
+          </CardTitle>
+          <p className="text-muted-foreground text-xs">
+            Named links and addresses to pick from when scheduling this
+            post&apos;s interviews. Overriding only one mode (video or
+            on-site) still falls back to the global list for the other.
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <RadioGroup
+            value={logisticsMode}
+            onValueChange={(v) => setLogisticsMode(v as "global" | "custom")}
+            className="gap-2"
+          >
+            <Label className="flex items-center gap-2 font-normal">
+              <RadioGroupItem value="global" /> Use the global presets
+            </Label>
+            <Label className="flex items-center gap-2 font-normal">
+              <RadioGroupItem value="custom" /> Custom presets for this job post
+            </Label>
+          </RadioGroup>
+
+          {logisticsMode === "custom" ? (
+            <LogisticsPresetsEditor presets={presets} onChange={setPresets} />
+          ) : (
+            <p className="text-muted-foreground rounded-md border border-dashed p-3 text-sm">
+              HR will pick from the global logistics presets.
             </p>
           )}
         </CardContent>

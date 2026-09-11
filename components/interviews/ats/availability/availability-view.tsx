@@ -2,7 +2,14 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { CalendarX2, ChevronDown, ChevronRight, Clock, Globe } from "lucide-react";
+import {
+  CalendarX2,
+  ChevronDown,
+  ChevronRight,
+  Clock,
+  Globe,
+  Link2,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,8 +32,10 @@ import {
   type AvailabilityWindow,
   type GlobalAvailability,
   type InterviewConfig,
+  type LogisticsPresetInput,
 } from "@/features/interviews/schema";
 import { AvailabilityEditor } from "../shared/availability-editor";
+import { LogisticsPresetsEditor } from "../shared/logistics-presets-editor";
 
 export function AvailabilityView() {
   const { data, loading, error, refetch } = useGlobalAvailability();
@@ -56,19 +65,30 @@ export function AvailabilityView() {
   );
 }
 
+const asInput = (p: GlobalAvailability["logistics_presets"][number]) => ({
+  mode: p.mode,
+  label: p.label,
+  value: p.value,
+  company_address_id: p.company_address_id,
+});
+
 const snapshot = (
   config: InterviewConfig,
   windows: AvailabilityWindow[],
-) => JSON.stringify({ config, windows });
+  presets: LogisticsPresetInput[],
+) => JSON.stringify({ config, windows, presets });
 
 function CalendarForm({ initial }: { initial: GlobalAvailability }) {
   const [windows, setWindows] = useState<AvailabilityWindow[]>(initial.windows);
   const [config, setConfig] = useState<InterviewConfig>(initial.config);
+  const [presets, setPresets] = useState<LogisticsPresetInput[]>(
+    initial.logistics_presets.map(asInput),
+  );
   const [saving, setSaving] = useState(false);
   const [savedSnapshot, setSavedSnapshot] = useState(() =>
-    snapshot(initial.config, initial.windows),
+    snapshot(initial.config, initial.windows, initial.logistics_presets.map(asInput)),
   );
-  const dirty = snapshot(config, windows) !== savedSnapshot;
+  const dirty = snapshot(config, windows, presets) !== savedSnapshot;
   const overrideCount = initial.overrides.length;
 
   const save = async () => {
@@ -78,12 +98,21 @@ function CalendarForm({ initial }: { initial: GlobalAvailability }) {
         return;
       }
     }
+    for (const p of presets) {
+      if (!p.label.trim() || (!p.company_address_id && !p.value.trim())) {
+        toast.error("Every preset needs a name and a value or a linked address");
+        return;
+      }
+    }
     setSaving(true);
     try {
-      const next = await setGlobalAvailability({ config, windows });
+      const next = await setGlobalAvailability({ config, windows, logistics_presets: presets });
       setWindows(next.windows);
       setConfig(next.config);
-      setSavedSnapshot(snapshot(next.config, next.windows));
+      setPresets(next.logistics_presets.map(asInput));
+      setSavedSnapshot(
+        snapshot(next.config, next.windows, next.logistics_presets.map(asInput)),
+      );
       toast.success("Availability saved");
     } catch {
       /* handled */
@@ -129,6 +158,27 @@ function CalendarForm({ initial }: { initial: GlobalAvailability }) {
           <AvailabilityEditor
             windows={windows}
             onChange={setWindows}
+            disabled={saving}
+          />
+        </CardContent>
+      </Card>
+
+      {/* logistics presets */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Link2 className="size-4" /> Logistics presets
+          </CardTitle>
+          <p className="text-muted-foreground text-xs">
+            Named links and addresses HR can pick from a dropdown when
+            scheduling an interview, instead of retyping the same one each
+            time. A job post can set its own on its Scheduling tab.
+          </p>
+        </CardHeader>
+        <CardContent>
+          <LogisticsPresetsEditor
+            presets={presets}
+            onChange={setPresets}
             disabled={saving}
           />
         </CardContent>

@@ -21,6 +21,43 @@ export interface InterviewConfig {
   timezone: string;
 }
 
+export type LogisticsMode = "video" | "onsite";
+
+/** A `company_addresses` row, resolved server-side wherever a preset or a
+ * booked interview links to one — enough to render a map from lat/long. */
+export interface ResolvedAddress {
+  id: string;
+  label: string;
+  line1: string;
+  line2: string | null;
+  city: string;
+  state_province: string | null;
+  postal_code: string | null;
+  country: string;
+  latitude: string | null;
+  longitude: string | null;
+}
+
+/** A named, reusable video-call link or on-site address HR can drop into an
+ * interview's logistics field with one click. An on-site preset can instead
+ * link a saved company address (`company_address_id`) — `value` is then the
+ * server-formatted text of that address, always current. */
+export interface LogisticsPreset {
+  id: string;
+  mode: LogisticsMode;
+  label: string;
+  value: string;
+  company_address_id: string | null;
+  address: ResolvedAddress | null;
+}
+
+export interface LogisticsPresetInput {
+  mode: LogisticsMode;
+  label: string;
+  value: string;
+  company_address_id: string | null;
+}
+
 /** A calendar-date exception to the recurring weekly windows. Covers a single
  * day (end_date === start_date) or an inclusive range. `is_unavailable` blocks
  * the days outright; otherwise `start`/`end` replace that day's weekly hours. */
@@ -47,11 +84,13 @@ export interface GlobalAvailability {
   config: InterviewConfig;
   windows: AvailabilityWindow[];
   overrides: DateOverride[];
+  logistics_presets: LogisticsPreset[];
 }
 
 export interface GlobalAvailabilityInput {
   config: InterviewConfig;
   windows: AvailabilityWindow[];
+  logistics_presets: LogisticsPresetInput[];
 }
 
 export interface Interviewer {
@@ -66,11 +105,14 @@ export interface JobPostAvailability {
   windows: AvailabilityWindow[]; // effective (custom if any, else global)
   interviewers: Interviewer[];
   config: InterviewConfig;
+  uses_custom_logistics: boolean;
+  logistics_presets: LogisticsPreset[]; // effective, per mode
 }
 
 export interface JobPostAvailabilityInput {
   windows: AvailabilityWindow[]; // empty => use the global calendar
   interviewer_ids: string[];
+  logistics_presets: LogisticsPresetInput[]; // empty per mode => use global
 }
 
 export interface UpcomingInterview {

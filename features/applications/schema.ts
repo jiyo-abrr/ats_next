@@ -7,6 +7,7 @@ import type {
   TemplateType,
 } from "@/lib/types";
 import type { AssessmentAttempt } from "@/features/assessments/schema";
+import type { ResolvedAddress } from "@/features/interviews/schema";
 
 export interface ApplicationSummary {
   id: string;
@@ -169,6 +170,10 @@ export interface InterviewRequest {
   application_id: string;
   mode: InterviewMode;
   location_or_link: string | null;
+  /** On-site only: the company address `location_or_link` was set from
+   * (typically by picking a logistics preset) — lets the map show. */
+  company_address_id: string | null;
+  address: ResolvedAddress | null;
   duration_minutes: number;
   notes: string | null;
   /** true: candidate self-books from availability; false: HR hand-picked slots. */
@@ -189,6 +194,7 @@ export interface InterviewOpenSlot {
 export interface InterviewRequestInput {
   mode: InterviewMode;
   location_or_link?: string | null;
+  company_address_id?: string | null;
   duration_minutes: number;
   notes?: string | null;
   slots: { starts_at: string }[];

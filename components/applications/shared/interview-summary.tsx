@@ -2,6 +2,7 @@
 
 import { Check, MapPin, Phone, Video } from "lucide-react";
 
+import { AddressMap } from "@/components/address-map";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatDateTime } from "@/lib/utils/format";
 import { useInterview } from "@/features/applications/hooks";
@@ -27,23 +28,32 @@ export function InterviewSummary({ applicationId }: { applicationId: string }) {
 
   return (
     <Card>
-      <CardContent className="flex flex-wrap items-center gap-x-4 gap-y-1 p-4 text-sm">
-        <span className="flex items-center gap-2 font-medium">
-          <Check className="size-4 text-emerald-600" /> Interview
-        </span>
-        <span className="text-muted-foreground flex items-center gap-1.5 capitalize">
-          <Icon className="size-4" /> {interview.mode}
-        </span>
-        <span className="tabular-nums">
-          {formatDateTime(selected.starts_at)}
-        </span>
-        <span className="text-muted-foreground">
-          {interview.duration_minutes} min
-        </span>
-        {interview.location_or_link ? (
-          <span className="text-muted-foreground">
-            {interview.location_or_link}
+      <CardContent className="space-y-3 p-4">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+          <span className="flex items-center gap-2 font-medium">
+            <Check className="size-4 text-emerald-600" /> Interview
           </span>
+          <span className="text-muted-foreground flex items-center gap-1.5 capitalize">
+            <Icon className="size-4" /> {interview.mode}
+          </span>
+          <span className="tabular-nums">
+            {formatDateTime(selected.starts_at)}
+          </span>
+          <span className="text-muted-foreground">
+            {interview.duration_minutes} min
+          </span>
+          {interview.location_or_link ? (
+            <span className="text-muted-foreground">
+              {interview.location_or_link}
+            </span>
+          ) : null}
+        </div>
+        {interview.address ? (
+          <AddressMap
+            latitude={interview.address.latitude}
+            longitude={interview.address.longitude}
+            label={interview.address.label}
+          />
         ) : null}
       </CardContent>
     </Card>

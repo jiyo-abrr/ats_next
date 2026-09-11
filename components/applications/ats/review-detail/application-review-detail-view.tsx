@@ -142,7 +142,7 @@ export function ApplicationReviewDetailView({ id }: { id: string }) {
       )}
 
       {app.status === "interview" ? (
-        <InterviewScheduler applicationId={id} />
+        <InterviewScheduler applicationId={id} jobPostId={app.job_post_id} />
       ) : (
         <InterviewSummary applicationId={id} />
       )}
